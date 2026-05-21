@@ -1,0 +1,101 @@
+{
+  "tools": {
+    "apply_memory_lifecycle_policy": {
+      "allowed": true,
+      "description_hash": "1875b1154235462663478773cf8400b0ac381e5e1d8b0b8d6025e234b24d1d97",
+      "input_schema_hash": "1d4cddf5f75b1412090f82bbfe30b1210e18c8bceea48277c128a78914971403",
+      "risk": "local_memory_maintenance"
+    },
+    "get_action_ledger": {
+      "allowed": true,
+      "description_hash": "fa49f7073d5261db5ffbf8e3a72774a991fedfa479c5c8a073a4aed8608723a6",
+      "input_schema_hash": "64325441e29fb598b23f6160449a70d5aa47dd77c2cc193579fe52d1606c245f",
+      "risk": "local_audit_read"
+    },
+    "get_blast_radius": {
+      "allowed": true,
+      "description_hash": "bd1fbaddf581331b10fe5493ed326f9ffc06d72bbf24f7ade1d895aefa5735a3",
+      "input_schema_hash": "dc2a3bfe002f0b7f7d2757e35877b189e9d13299966c6372ef3c839f0803aa04",
+      "risk": "local_read_context"
+    },
+    "get_change_impact": {
+      "allowed": true,
+      "description_hash": "41f9d44d7061ef60f5351c90a1ac36ee8256ec9db3a0f297ccdce8857d9169e2",
+      "input_schema_hash": "13b711fd6167f8dc539bfa23daceb4c11e7823395ed56b7f3c756c63961f9110",
+      "risk": "local_read_context"
+    },
+    "get_context_capsule": {
+      "allowed": true,
+      "description_hash": "3d1c6743a4962253dab6dc37315a2ab05603683d932e35df43bf25ac2cbcf981",
+      "input_schema_hash": "1ef8b5669095f9fa398ba0b25a8c97a31558b495834946ed825150fdfbae16ba",
+      "risk": "local_read_context"
+    },
+    "get_doctor_status": {
+      "allowed": true,
+      "description_hash": "49950bbc3127a7b699650d44a8465638eb65576c607a0413b0a7597f5b723a5d",
+      "input_schema_hash": "d746974fa9afd5e951f76f9af38954b0ad7f436f2120dc974da65e5ee39f856f",
+      "risk": "local_status_read"
+    },
+    "get_file_skeleton": {
+      "allowed": true,
+      "description_hash": "0ca40ffabfa0b1c85df263d0323358a3c411a63c123260bd86fb704c57d7abb3",
+      "input_schema_hash": "48f75f5b1697af475ff1a7491dc76cf769b9652cda3ae26b59e8afce4d92aba3",
+      "risk": "local_read_context"
+    },
+    "get_symbol_context": {
+      "allowed": true,
+      "description_hash": "b3473f566aceab003f5d7e37a7aa667c95bf61c00a97b526c808a90e4113d889",
+      "input_schema_hash": "ce8ced0d342ec6caae7319a794a03efc3540348643efdbbeb78fb516d6de5ebb",
+      "risk": "local_read_context"
+    },
+    "get_symbol_references": {
+      "allowed": true,
+      "description_hash": "577d2f835f285f514e5aee0bf86c09ce3de680bfaf814f8e9348cee39f2f4c04",
+      "input_schema_hash": "003c04218244caa5f01317919d70a2b549dff5cf172cc20fdce37f04ee57d376",
+      "risk": "local_read_context"
+    },
+    "index_repository": {
+      "allowed": true,
+      "description_hash": "56b8f1999178c20eaeb67c14546ee67e661978e5817023d3855f0070cc7ff336",
+      "input_schema_hash": "f98e3ee1f998d49ec1e7c99ef16aaae7430cc6821e0e2e6bf38b7b6921a12394",
+      "risk": "local_read_index"
+    },
+    "read_session_memory": {
+      "allowed": true,
+      "description_hash": "4f39f82e45cb99cc48578d119b48a10076c8426b75af19ab6a3d1421bafdd211",
+      "input_schema_hash": "016765bada7f63b145556343ac4c834d841d047bed853b48bec62756afa49ff0",
+      "risk": "local_memory_read"
+    },
+    "resolve_docs_context": {
+      "allowed": true,
+      "description_hash": "c70026052285d36e28930e4fc66adc00b4157c53520e0b26cff2087f38683068",
+      "input_schema_hash": "10798ac8d2df2a3150d204e10be2e4fb12cc89650fb68e3a6d3b4b38e1914e26",
+      "risk": "public_docs_context"
+    },
+    "search_symbols": {
+      "allowed": true,
+      "description_hash": "37fa8d5b9c4556ff2a14a6e15c0b848cf64b32880000c7ade090a2ae325af940",
+      "input_schema_hash": "99e7de334cbfb22d4af7d97176b8da01fd77251ceca870b2e5636d57c00b07e9",
+      "risk": "local_read_context"
+    },
+    "workspace_list": {
+      "allowed": true,
+      "description_hash": "3611e36ae3b0d56fa2dd8ec0686f28ce65973bca839fdf1e343fe25b014df78c",
+      "input_schema_hash": "d746974fa9afd5e951f76f9af38954b0ad7f436f2120dc974da65e5ee39f856f",
+      "risk": "workspace_read"
+    },
+    "workspace_register": {
+      "allowed": true,
+      "description_hash": "c285ffe6effb266719b8a84fc52a6ab5acdb16d14a7a50b4925b9fb4d35bb40a",
+      "input_schema_hash": "39b714704935190561ed407980480b9a4a0b346b97346e0bff71fb9ace820194",
+      "risk": "workspace_read_registration"
+    },
+    "write_session_memory": {
+      "allowed": true,
+      "description_hash": "4fe750c10a9f873bc9b62c06213b49497d4c776bfd0b6504cb4eb8ca0a8357b1",
+      "input_schema_hash": "8cb7915f14d0ed6ec374e3ecfd09955c59439252aa07684f8a632972e321789e",
+      "risk": "local_memory_write"
+    }
+  },
+  "version": 1
+}

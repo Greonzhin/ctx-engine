@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys to avoid stale context after re-indexing
@@ -66,6 +66,7 @@ ctx install claude
 ctx install gemini
 ctx install status
 ctx client-check --run
+ctx security-scan . --all
 ctx doctor --strict
 ctx mcp-check
 ctx mcp-lint --strict
@@ -120,9 +121,11 @@ Additional local verification helpers:
 ```powershell
 .\scripts\client_smoke.ps1 -UseDocker -RunClients
 .\scripts\external_runtime_smoke.ps1
+.\scripts\quality_gate.ps1
 ```
 
 `client_smoke.ps1` verifies generated adapter status and can run installed Codex/Claude/Gemini client probes. `external_runtime_smoke.ps1` verifies Kuzu and reports optional Hindsight/LSP/SCIP runtime probes when their environment variables are configured.
+`quality_gate.ps1` runs the local P1 gate; pass `-RunSecurityScanners` to require installed Semgrep and Gitleaks.
 
 ## MCP Tools
 
@@ -160,11 +163,11 @@ See [Memory And Graph Repo Scan](docs/research/memory-and-graph-repo-scan-2026-0
 
 P1 candidates:
 
+- MCP descriptor hash registry and allowlist quality gate
+- workflow recipes and local quality gate script
+- optional scanner adapters such as Semgrep and Gitleaks
 - test suggestion engine
-- workflow recipes
 - Codex/Claude/Gemini hooks where available
-- descriptor hash registry and MCP allowlist
-- scanner adapters such as Semgrep and Gitleaks
 - egress reports and rules drift checks
 
 P2 optional paths now present behind explicit opt-in:
@@ -191,6 +194,7 @@ ctx doctor
 ctx doctor --strict
 ctx install status
 ctx client-check
+ctx security-scan . --all
 ctx mcp-check
 ctx mcp-lint
 ctx inspector-smoke
@@ -206,6 +210,7 @@ ctx benchmark "where is auth handled?"
 scripts/docker_smoke.ps1
 scripts/client_smoke.ps1
 scripts/external_runtime_smoke.ps1
+scripts/quality_gate.ps1
 ```
 
 Semantic ingest toggles (optional):

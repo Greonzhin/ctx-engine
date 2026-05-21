@@ -26,7 +26,7 @@ ctx = "ctx_engine.cli:main"
 include = ["ctx_engine*"]
 
 [tool.setuptools.package-data]
-ctx_engine = ["migrations/*.sql"]
+ctx_engine = ["migrations/*.sql", "mcp_tool_registry.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

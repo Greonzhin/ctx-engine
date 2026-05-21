@@ -47,6 +47,7 @@ def test_client_and_external_runtime_smoke_scripts_exist():
     root = Path(__file__).resolve().parents[1]
     client = (root / "scripts" / "client_smoke.ps1").read_text(encoding="utf-8")
     external = (root / "scripts" / "external_runtime_smoke.ps1").read_text(encoding="utf-8")
+    quality = (root / "scripts" / "quality_gate.ps1").read_text(encoding="utf-8")
 
     assert "client-check" in client
     assert "claude mcp get ctx-engine" in client
@@ -55,3 +56,5 @@ def test_client_and_external_runtime_smoke_scripts_exist():
     assert "CTX_ENGINE_HINDSIGHT_ENDPOINT" in external
     assert "CTX_ENGINE_LSP_" in external
     assert "CTX_ENGINE_SCIP_" in external
+    assert "mcp-lint --strict" in quality
+    assert "docker_smoke.ps1" in quality

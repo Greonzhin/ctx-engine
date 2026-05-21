@@ -23,6 +23,7 @@ from .providers.local_docs import LocalDocsProvider
 from .providers.memory import BuiltInMemoryProvider
 from .pack_summary import pack_summary
 from .retrieval_benchmark import run_retrieval_benchmark
+from .security_scan import SUPPORTED_SCANNERS, scan_security
 from .server import serve
 from .workspace import get_workspace, list_workspaces, register_workspace
 
@@ -291,6 +292,18 @@ def cmd_client_check(args: argparse.Namespace) -> int:
     return 1 if args.strict and result["status"] != "ok" else 0
 
 
+def cmd_security_scan(args: argparse.Namespace) -> int:
+    result = scan_security(
+        args.path,
+        scanner=args.scanner,
+        all_scanners=args.all,
+        strict=args.strict,
+        timeout=args.timeout,
+    )
+    print_json(result)
+    return 1 if args.strict and result["status"] != "pass" else 0
+
+
 def cmd_ledger(args: argparse.Namespace) -> int:
     ledger = ActionLedger()
     if args.ledger_command == "tail":
@@ -474,6 +487,14 @@ def build_parser() -> argparse.ArgumentParser:
     client_check.add_argument("--timeout", type=float, default=8.0)
     client_check.add_argument("--strict", action="store_true", help="Return non-zero when attention is needed.")
     client_check.set_defaults(func=cmd_client_check)
+
+    security_scan = sub.add_parser("security-scan")
+    security_scan.add_argument("path", nargs="?", default=".")
+    security_scan.add_argument("--scanner", choices=SUPPORTED_SCANNERS, default="semgrep")
+    security_scan.add_argument("--all", action="store_true", help="Run all supported optional scanners.")
+    security_scan.add_argument("--timeout", type=float, default=60.0)
+    security_scan.add_argument("--strict", action="store_true", help="Return non-zero for missing scanners, scanner errors, or findings.")
+    security_scan.set_defaults(func=cmd_security_scan)
 
     ledger = sub.add_parser("ledger")
     ledger_sub = ledger.add_subparsers(dest="ledger_command", required=True)

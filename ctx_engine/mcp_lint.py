@@ -4,6 +4,7 @@ import re
 from typing import Any
 
 from .config import SUPPORTED_MODES
+from .mcp_registry import compare_tools_to_registry
 from .server import MCPGateway
 
 NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -84,6 +85,10 @@ def lint_gateway_tools(mode: str = "safe") -> dict[str, Any]:
         errors.extend(f"{name}: {item}" for item in report["errors"])
         warnings.extend(f"{name}: {item}" for item in report["warnings"])
 
+    registry_result = compare_tools_to_registry(tools)
+    errors.extend(registry_result["errors"])
+    warnings.extend(registry_result["warnings"])
+
     overall = "pass"
     if errors:
         overall = "fail"
@@ -96,5 +101,11 @@ def lint_gateway_tools(mode: str = "safe") -> dict[str, Any]:
         "errors": sorted(errors),
         "warnings": sorted(warnings),
         "tool_count": len(tools),
+        "registry": {
+            "status": registry_result["status"],
+            "version": registry_result["registry_version"],
+            "registered_tool_count": registry_result["registered_tool_count"],
+            "reports": registry_result["registry_reports"],
+        },
         "tools": tool_reports,
     }
