@@ -14,6 +14,7 @@ from ..providers.code_graph import CodeGraphProvider
 from ..providers.local_docs import LocalDocsProvider
 from ..providers.memory import BuiltInMemoryProvider
 from ..security.redaction import redact_text
+from ..workflow import suggest_workflow
 from ..workspace import get_workspace, workspace_fingerprint
 from .budget import reserve_budget
 from .conflicts import conflict_notes
@@ -69,6 +70,7 @@ class CapsuleBuilder:
         omitted_docs = self._omitted_docs(query, wid) if include_docs else []
         memory_context = self._memory(query, wid, budget["memory"])
         build_context = self.build_test.detect(root, [item["path"] for item in selected_files])
+        workflow_context = suggest_workflow(query)
 
         capsule_id = hashlib.sha256(
             json.dumps(
@@ -109,6 +111,7 @@ class CapsuleBuilder:
             "docs_context": docs_context,
             "memory_context": memory_context,
             "build_test_context": build_context,
+            "workflow_context": workflow_context,
             "risks": [
                 "Sensitive and ignored paths are excluded before indexing.",
                 "No shell or write tools are exposed by ctx-engine.",
@@ -127,6 +130,7 @@ class CapsuleBuilder:
                     "LocalDocsProvider",
                     "BuiltInMemoryProvider",
                     "BuildTestProvider",
+                    "WorkflowProvider",
                     "CacheProvider",
                     "SafetyProvider",
                     "ActionLedger",

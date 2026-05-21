@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys to avoid stale context after re-indexing
@@ -27,6 +27,7 @@ Implemented:
 - Codex, Claude, Gemini, and generic MCP adapter generation
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
+- Built-in workflow recipes, generated-rules drift checks, and deterministic log compression
 
 Not implemented in P0:
 
@@ -68,6 +69,9 @@ ctx install gemini
 ctx install status
 ctx client-check --run
 ctx security-scan . --all
+ctx workflow suggest "fix failing auth test"
+ctx rules check . --strict
+ctx compress-log failing-test.log
 ctx doctor --strict
 ctx mcp-check
 ctx mcp-lint --strict
@@ -168,6 +172,7 @@ P1 candidates:
 - workflow recipes and local quality gate script
 - optional scanner adapters such as Semgrep and Gitleaks
 - test suggestion engine refinements
+- rules drift detection and deterministic terminal log compression
 - Codex/Claude/Gemini hooks where available
 - egress reports and rules drift checks
 
@@ -196,6 +201,9 @@ ctx doctor --strict
 ctx install status
 ctx client-check
 ctx security-scan . --all
+ctx workflow list
+ctx rules check . --strict
+ctx compress-log failing-test.log
 ctx mcp-check
 ctx mcp-lint
 ctx inspector-smoke

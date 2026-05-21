@@ -39,6 +39,23 @@ Write-Step "semantic quality gate"
 Write-Step "mcp lint strict"
 & $projectPython -m ctx_engine.cli mcp-lint --strict
 
+Write-Step "rules drift strict"
+& $projectPython -m ctx_engine.cli rules check . --strict
+
+Write-Step "workflow recipes"
+& $projectPython -m ctx_engine.cli workflow list
+
+Write-Step "log compression smoke"
+$sampleLog = Join-Path $testTmp "sample-log.txt"
+@"
+============================= FAILURES =============================
+FAILED tests/test_auth.py::test_authenticate_request_accepts_valid_token
+Traceback (most recent call last):
+  AssertionError: expected valid token
+docker compose failed with permission denied
+"@ | Set-Content -Path $sampleLog -Encoding UTF8
+& $projectPython -m ctx_engine.cli compress-log $sampleLog
+
 Write-Step "workspace index for docs gate"
 & $projectPython -m ctx_engine.cli index .
 

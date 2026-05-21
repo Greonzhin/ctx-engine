@@ -12,6 +12,7 @@ from .client_adapters import ClaudeAdapter, CodexAdapter, GeminiAdapter, Generic
 from .config import DEFAULT_HOST, DEFAULT_PORT, SUPPORTED_MODES, ensure_project_config
 from .doctor import doctor_status
 from .inspector_smoke import inspector_smoke
+from .log_compression import compress_log_file, compress_log_text
 from .mcp_contract import check_gateway_contract, check_http_gateway_contract
 from .mcp_lint import lint_gateway_tools
 from .pathmap import check_paths, map_path
@@ -23,8 +24,10 @@ from .providers.local_docs import LocalDocsProvider
 from .providers.memory import BuiltInMemoryProvider
 from .pack_summary import pack_summary
 from .retrieval_benchmark import run_retrieval_benchmark
+from .rules_check import check_rules_drift
 from .security_scan import SUPPORTED_SCANNERS, scan_security
 from .server import serve
+from .workflow import list_workflows, show_workflow, suggest_workflow
 from .workspace import get_workspace, list_workspaces, register_workspace
 
 
@@ -90,6 +93,10 @@ def cmd_capsule(args: argparse.Namespace) -> int:
         print("\n## Test Plan")
         for item in capsule.get("build_test_context", {}).get("test_plan", []):
             print(f"- {item['command']} ({item['reason']})")
+        workflow = capsule.get("workflow_context", {}).get("recipe", {})
+        if workflow:
+            print("\n## Workflow")
+            print(f"- {workflow['name']}: {workflow['intent']}")
         print(f"\nLedger: {capsule['ledger_id']}")
     else:
         print_json(capsule)
@@ -307,6 +314,40 @@ def cmd_security_scan(args: argparse.Namespace) -> int:
     return 1 if args.strict and result["status"] != "pass" else 0
 
 
+def cmd_workflow(args: argparse.Namespace) -> int:
+    if args.workflow_command == "list":
+        print_json(list_workflows())
+    elif args.workflow_command == "show":
+        result = show_workflow(args.name)
+        print_json(result)
+        return 0 if result["status"] == "ok" else 1
+    elif args.workflow_command == "suggest":
+        print_json(suggest_workflow(args.query))
+    else:
+        raise SystemExit("unknown workflow command")
+    return 0
+
+
+def cmd_rules(args: argparse.Namespace) -> int:
+    if args.rules_command != "check":
+        raise SystemExit("unknown rules command")
+    result = check_rules_drift(args.path)
+    print_json(result)
+    if args.strict:
+        return 0 if result["status"] == "ok" else 1
+    return 0
+
+
+def cmd_compress_log(args: argparse.Namespace) -> int:
+    if args.file:
+        result = compress_log_file(args.file, max_lines=args.max_lines)
+    else:
+        result = compress_log_text(sys.stdin.read(), max_lines=args.max_lines)
+        result["source"] = "stdin"
+    print_json(result)
+    return 0
+
+
 def cmd_ledger(args: argparse.Namespace) -> int:
     ledger = ActionLedger()
     if args.ledger_command == "tail":
@@ -498,6 +539,29 @@ def build_parser() -> argparse.ArgumentParser:
     security_scan.add_argument("--timeout", type=float, default=60.0)
     security_scan.add_argument("--strict", action="store_true", help="Return non-zero for missing scanners, scanner errors, or findings.")
     security_scan.set_defaults(func=cmd_security_scan)
+
+    workflow = sub.add_parser("workflow")
+    workflow_sub = workflow.add_subparsers(dest="workflow_command", required=True)
+    workflow_list = workflow_sub.add_parser("list")
+    workflow_list.set_defaults(func=cmd_workflow)
+    workflow_show = workflow_sub.add_parser("show")
+    workflow_show.add_argument("name")
+    workflow_show.set_defaults(func=cmd_workflow)
+    workflow_suggest = workflow_sub.add_parser("suggest")
+    workflow_suggest.add_argument("query")
+    workflow_suggest.set_defaults(func=cmd_workflow)
+
+    rules = sub.add_parser("rules")
+    rules_sub = rules.add_subparsers(dest="rules_command", required=True)
+    rules_check = rules_sub.add_parser("check")
+    rules_check.add_argument("path", nargs="?", default=".")
+    rules_check.add_argument("--strict", action="store_true", help="Return non-zero when generated files drift from .ctx-engine/rules.yaml.")
+    rules_check.set_defaults(func=cmd_rules)
+
+    compress_log = sub.add_parser("compress-log")
+    compress_log.add_argument("file", nargs="?")
+    compress_log.add_argument("--max-lines", type=int, default=80)
+    compress_log.set_defaults(func=cmd_compress_log)
 
     ledger = sub.add_parser("ledger")
     ledger_sub = ledger.add_subparsers(dest="ledger_command", required=True)
