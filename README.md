@@ -1,5 +1,7 @@
 # ctx-engine
 
+[![ci](https://github.com/Greonzhin/ctx-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Greonzhin/ctx-engine/actions/workflows/ci.yml)
+
 `ctx-engine` is a standalone, local-first MCP context gateway for Codex, Claude Code, and Gemini CLI.
 
 P0 focuses on one reliable job: run a Dockerized read-only MCP gateway that indexes local code/docs, builds provenance-rich context capsules, keeps built-in SQLite memory, records an action ledger, and generates client adapters.
