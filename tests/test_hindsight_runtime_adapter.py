@@ -2,18 +2,30 @@ from __future__ import annotations
 
 import json
 import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from ctx_engine.providers.code_graph import CodeGraphProvider
 from ctx_engine.providers.memory import BuiltInMemoryProvider
 
 
-def _start_server(handler_cls: type[BaseHTTPRequestHandler]) -> tuple[HTTPServer, threading.Thread, str]:
-    server = HTTPServer(("127.0.0.1", 0), handler_cls)
+def _start_server(handler_cls: type[BaseHTTPRequestHandler]) -> tuple[ThreadingHTTPServer, threading.Thread, str]:
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler_cls)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     endpoint = f"http://127.0.0.1:{server.server_port}"
     return server, thread, endpoint
+
+
+def _send_json(handler: BaseHTTPRequestHandler, body: object, status: int = 200) -> None:
+    data = json.dumps(body, ensure_ascii=False).encode("utf-8")
+    handler.send_response(status)
+    handler.send_header("Content-Type", "application/json")
+    handler.send_header("Content-Length", str(len(data)))
+    handler.send_header("Connection", "close")
+    handler.end_headers()
+    handler.wfile.write(data)
+    handler.wfile.flush()
+    handler.close_connection = True
 
 
 class _OkHandler(BaseHTTPRequestHandler):
@@ -29,14 +41,11 @@ class _OkHandler(BaseHTTPRequestHandler):
             body = {"status": "ok", "provider_used": "hindsight"}
         else:
             self.send_response(404)
+            self.send_header("Content-Length", "0")
+            self.send_header("Connection", "close")
             self.end_headers()
             return
-        data = json.dumps(body, ensure_ascii=False).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        _send_json(self, body)
 
     def log_message(self, format, *args):  # noqa: A003
         return
@@ -45,7 +54,10 @@ class _OkHandler(BaseHTTPRequestHandler):
 class _FailHandler(BaseHTTPRequestHandler):
     def do_POST(self):  # noqa: N802
         self.send_response(500)
+        self.send_header("Content-Length", "0")
+        self.send_header("Connection", "close")
         self.end_headers()
+        self.close_connection = True
 
     def log_message(self, format, *args):  # noqa: A003
         return
@@ -61,14 +73,11 @@ class _LegacyRecallArrayHandler(BaseHTTPRequestHandler):
             body = {"status": "ok", "provider_used": "hindsight"}
         else:
             self.send_response(404)
+            self.send_header("Content-Length", "0")
+            self.send_header("Connection", "close")
             self.end_headers()
             return
-        data = json.dumps(body, ensure_ascii=False).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        _send_json(self, body)
 
     def log_message(self, format, *args):  # noqa: A003
         return
