@@ -18,4 +18,24 @@ Privacy:
 - Context7 is public documentation only.
 - Secrets and ignored files must not appear in capsules, cache, or ledger.
 
+Hook guidance:
+
+- Advisory only: ctx-engine does not auto-install executable hooks.
+- Inspect the current plan with `ctx hooks plan codex`.
+- Keep generated client files in sync with `ctx rules check . --strict`.
+
+Recommended checks:
+
+- `ctx doctor --strict` (session-start): Verify local runtime, Docker daemon visibility, path mapping, and gateway prerequisites.
+- `ctx mcp-lint --strict` (pre-tool-use): Fail fast if the exposed MCP tool surface drifts from the allowlisted registry.
+- `scripts/quality_gate.ps1` (pre-handoff): Run the local pytest, rules, MCP, docs, egress, compression, and Docker quality gate.
+
+Blocked unless explicitly approved:
+
+- Auto-installing executable hooks without explicit user approval.
+- Adding shell or repository write tools to the MCP surface.
+- Connecting directly to downstream docs, memory, code graph, or shell MCP servers.
+- Sending private source, private docs, secrets, ignored files, or full prompts to external providers.
+
+
 Validation notes should include files changed, suggested tests, risks, and commands run.

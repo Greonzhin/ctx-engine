@@ -11,6 +11,7 @@ from .client_check import check_clients
 from .client_adapters import ClaudeAdapter, CodexAdapter, GeminiAdapter, GenericAdapter
 from .config import DEFAULT_HOST, DEFAULT_PORT, SUPPORTED_MODES, ensure_project_config
 from .doctor import doctor_status
+from .hooks import SUPPORTED_HOOK_CLIENTS, hook_plan
 from .inspector_smoke import inspector_smoke
 from .log_compression import compress_log_file, compress_log_text
 from .mcp_contract import check_gateway_contract, check_http_gateway_contract
@@ -338,6 +339,13 @@ def cmd_rules(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_hooks(args: argparse.Namespace) -> int:
+    if args.hooks_command != "plan":
+        raise SystemExit("unknown hooks command")
+    print_json(hook_plan(args.client))
+    return 0
+
+
 def cmd_compress_log(args: argparse.Namespace) -> int:
     if args.file:
         result = compress_log_file(args.file, max_lines=args.max_lines)
@@ -557,6 +565,12 @@ def build_parser() -> argparse.ArgumentParser:
     rules_check.add_argument("path", nargs="?", default=".")
     rules_check.add_argument("--strict", action="store_true", help="Return non-zero when generated files drift from .ctx-engine/rules.yaml.")
     rules_check.set_defaults(func=cmd_rules)
+
+    hooks = sub.add_parser("hooks")
+    hooks_sub = hooks.add_subparsers(dest="hooks_command", required=True)
+    hooks_plan = hooks_sub.add_parser("plan")
+    hooks_plan.add_argument("client", nargs="?", default="all", choices=["all", *SUPPORTED_HOOK_CLIENTS])
+    hooks_plan.set_defaults(func=cmd_hooks)
 
     compress_log = sub.add_parser("compress-log")
     compress_log.add_argument("file", nargs="?")

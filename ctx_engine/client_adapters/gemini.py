@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from .base import ClientAdapter
+from ..hooks import hook_guidance_markdown
 
 
 class GeminiAdapter(ClientAdapter):
@@ -46,6 +47,8 @@ ctx serve --mode offline
 ```
 
 Use sandboxing where available. Do not send private source code, private docs, secrets, or full prompts to external providers.
+
+{hook_guidance_markdown("gemini")}
 """,
             encoding="utf-8",
         )

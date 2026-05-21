@@ -45,6 +45,9 @@ Write-Step "rules drift strict"
 Write-Step "workflow recipes"
 & $projectPython -m ctx_engine.cli workflow list
 
+Write-Step "hook advisory plan"
+& $projectPython -m ctx_engine.cli hooks plan all
+
 Write-Step "log compression smoke"
 $sampleLog = Join-Path $testTmp "sample-log.txt"
 @"

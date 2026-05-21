@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from .base import ClientAdapter
+from ..hooks import hook_guidance_markdown
 
 
 class ClaudeAdapter(ClientAdapter):
@@ -42,6 +43,8 @@ Do not connect separate docs, memory, code graph, shell, or write-tool MCP serve
 Use ctx-engine capsules before significant edits, debugging, migrations, or repo analysis.
 
 Private code and private docs stay local. Context7 is public documentation only.
+
+{hook_guidance_markdown("claude")}
 """,
             encoding="utf-8",
         )

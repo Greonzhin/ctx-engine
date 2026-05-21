@@ -4,6 +4,7 @@ import tomllib
 from pathlib import Path
 
 from .base import ClientAdapter
+from ..hooks import hook_guidance_markdown
 
 
 class CodexAdapter(ClientAdapter):
@@ -46,6 +47,8 @@ Privacy:
 - Private source code and private docs stay local.
 - Context7 is public documentation only.
 - Secrets and ignored files must not appear in capsules, cache, or ledger.
+
+{hook_guidance_markdown("codex")}
 
 Validation notes should include files changed, suggested tests, risks, and commands run.
 """,
