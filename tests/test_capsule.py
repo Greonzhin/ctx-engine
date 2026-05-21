@@ -17,6 +17,7 @@ def test_capsule_returns_required_fields_under_budget(fixture_root):
     assert capsule["ledger_id"]
     assert "build_test_context" in capsule
     assert "test_plan" in capsule["build_test_context"]
+    assert capsule["feedback_context"]["feedback_count"] == 0
     assert capsule["workflow_context"]["recipe"]["name"] == "fix-failing-test"
     assert "app/middleware.py" in {item["path"] for item in capsule["selected_files"]}
     assert any(item["command"] == "pytest tests/test_auth.py" for item in capsule["build_test_context"]["test_plan"])

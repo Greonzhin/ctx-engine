@@ -10,6 +10,7 @@ from ..integrations.rtk import estimate_tokens, rank_text
 from ..providers.action_ledger import ActionLedger
 from ..providers.build_test import BuildTestProvider
 from ..providers.cache import CacheProvider, capsule_namespace
+from ..providers.capsule_feedback import CapsuleFeedbackProvider
 from ..providers.code_graph import CodeGraphProvider
 from ..providers.local_docs import LocalDocsProvider
 from ..providers.memory import BuiltInMemoryProvider
@@ -28,6 +29,7 @@ class CapsuleBuilder:
         self.docs = LocalDocsProvider()
         self.memory = BuiltInMemoryProvider()
         self.build_test = BuildTestProvider()
+        self.feedback = CapsuleFeedbackProvider()
         self.ledger = ActionLedger()
         self.cache = CacheProvider()
 
@@ -58,6 +60,9 @@ class CapsuleBuilder:
         cached = self.cache.get(namespace, cache_key)
         if cached:
             cached["cache"] = "hit"
+            capsule_id = str(cached.get("provenance", {}).get("capsule_id") or "")
+            if capsule_id:
+                cached["feedback_context"] = self.feedback.summary(capsule_id, workspace_id=wid)
             return cached
 
         symbols = self.code.search_symbols(query, wid, limit=16)
@@ -112,6 +117,7 @@ class CapsuleBuilder:
             "memory_context": memory_context,
             "build_test_context": build_context,
             "workflow_context": workflow_context,
+            "feedback_context": self.feedback.summary(capsule_id, workspace_id=wid),
             "risks": [
                 "Sensitive and ignored paths are excluded before indexing.",
                 "No shell or write tools are exposed by ctx-engine.",

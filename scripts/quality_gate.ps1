@@ -48,6 +48,9 @@ Write-Step "workflow recipes"
 Write-Step "hook advisory plan"
 & $projectPython -m ctx_engine.cli hooks plan all
 
+Write-Step "capsule feedback report"
+& $projectPython -m ctx_engine.cli feedback report --limit 5
+
 Write-Step "log compression smoke"
 $sampleLog = Join-Path $testTmp "sample-log.txt"
 @"

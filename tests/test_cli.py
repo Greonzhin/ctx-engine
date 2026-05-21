@@ -81,6 +81,10 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     assert hooks["status"] == "ok"
     assert hooks["clients"][0]["client_id"] == "codex"
 
+    assert main(["feedback", "report", "--limit", "5"]) == 0
+    feedback = json.loads(capsys.readouterr().out)
+    assert feedback["status"] == "ok"
+
     assert main(["retrieval-benchmark", str(fixture_root / "python_app"), "--top-k", "3"]) == 0
     retrieval = json.loads(capsys.readouterr().out)
     assert retrieval["status"] == "ok"

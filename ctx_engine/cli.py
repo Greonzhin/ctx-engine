@@ -18,6 +18,7 @@ from .mcp_contract import check_gateway_contract, check_http_gateway_contract
 from .mcp_lint import lint_gateway_tools
 from .pathmap import check_paths, map_path
 from .providers.action_ledger import ActionLedger
+from .providers.capsule_feedback import CapsuleFeedbackProvider, VALID_FEEDBACK_RATINGS
 from .providers.code_graph import CodeGraphProvider
 from .providers.egress import EgressProvider
 from .providers.context7_docs import Context7DocsProvider
@@ -356,6 +357,26 @@ def cmd_compress_log(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_feedback(args: argparse.Namespace) -> int:
+    provider = CapsuleFeedbackProvider()
+    if args.feedback_command == "record":
+        result = provider.record(
+            args.capsule_id,
+            args.rating,
+            workspace_id=args.workspace_id,
+            client_id=args.client_id,
+            useful_files=args.useful_file,
+            missing_files=args.missing_file,
+            notes=args.notes or "",
+        )
+        print_json(result)
+    elif args.feedback_command == "report":
+        print_json(provider.report(capsule_id=args.capsule_id, workspace_id=args.workspace_id, limit=args.limit))
+    else:
+        raise SystemExit("unknown feedback command")
+    return 0
+
+
 def cmd_ledger(args: argparse.Namespace) -> int:
     ledger = ActionLedger()
     if args.ledger_command == "tail":
@@ -576,6 +597,23 @@ def build_parser() -> argparse.ArgumentParser:
     compress_log.add_argument("file", nargs="?")
     compress_log.add_argument("--max-lines", type=int, default=80)
     compress_log.set_defaults(func=cmd_compress_log)
+
+    feedback = sub.add_parser("feedback")
+    feedback_sub = feedback.add_subparsers(dest="feedback_command", required=True)
+    feedback_record = feedback_sub.add_parser("record")
+    feedback_record.add_argument("capsule_id")
+    feedback_record.add_argument("--rating", required=True, choices=VALID_FEEDBACK_RATINGS)
+    feedback_record.add_argument("--workspace-id")
+    feedback_record.add_argument("--client-id", default="cli")
+    feedback_record.add_argument("--useful-file", action="append", default=[])
+    feedback_record.add_argument("--missing-file", action="append", default=[])
+    feedback_record.add_argument("--notes", default="")
+    feedback_record.set_defaults(func=cmd_feedback)
+    feedback_report = feedback_sub.add_parser("report")
+    feedback_report.add_argument("capsule_id", nargs="?")
+    feedback_report.add_argument("--workspace-id")
+    feedback_report.add_argument("--limit", type=int, default=50)
+    feedback_report.set_defaults(func=cmd_feedback)
 
     ledger = sub.add_parser("ledger")
     ledger_sub = ledger.add_subparsers(dest="ledger_command", required=True)
