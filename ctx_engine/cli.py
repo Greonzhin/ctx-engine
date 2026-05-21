@@ -87,6 +87,9 @@ def cmd_capsule(args: argparse.Namespace) -> int:
         print("\n## Suggested Tests")
         for item in capsule["test_suggestions"]:
             print(f"- {item}")
+        print("\n## Test Plan")
+        for item in capsule.get("build_test_context", {}).get("test_plan", []):
+            print(f"- {item['command']} ({item['reason']})")
         print(f"\nLedger: {capsule['ledger_id']}")
     else:
         print_json(capsule)

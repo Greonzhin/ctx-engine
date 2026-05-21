@@ -16,7 +16,9 @@ def test_capsule_returns_required_fields_under_budget(fixture_root):
     assert capsule["selected_files"]
     assert capsule["ledger_id"]
     assert "build_test_context" in capsule
+    assert "test_plan" in capsule["build_test_context"]
     assert "app/middleware.py" in {item["path"] for item in capsule["selected_files"]}
+    assert any(item["command"] == "pytest tests/test_auth.py" for item in capsule["build_test_context"]["test_plan"])
     assert all(item.get("confidence_label") in {"extracted", "inferred", "ambiguous"} for item in capsule["selected_files"])
     assert all(item.get("confidence_label") in {"extracted", "inferred", "ambiguous"} for item in capsule["selected_symbols"])
     assert all(item.get("semantic_confidence") in {"extracted", "inferred", "ambiguous"} for item in capsule["selected_files"])

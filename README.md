@@ -26,6 +26,7 @@ Implemented:
 - Docker runtime uses a non-root UID/GID and loopback-only compose port publishing
 - Codex, Claude, Gemini, and generic MCP adapter generation
 - Windows / WSL2 / Docker path mapping checks
+- Import-aware test plan suggestions in context capsules
 
 Not implemented in P0:
 
@@ -166,7 +167,7 @@ P1 candidates:
 - MCP descriptor hash registry and allowlist quality gate
 - workflow recipes and local quality gate script
 - optional scanner adapters such as Semgrep and Gitleaks
-- test suggestion engine
+- test suggestion engine refinements
 - Codex/Claude/Gemini hooks where available
 - egress reports and rules drift checks
 
