@@ -66,7 +66,13 @@ docker compose failed with permission denied
 & $projectPython -m ctx_engine.cli compress-log $sampleLog
 
 Write-Step "workspace index for docs gate"
-& $projectPython -m ctx_engine.cli index .
+$indexText = (& $projectPython -m ctx_engine.cli index .) -join "`n"
+Write-Host $indexText
+$indexPayload = $indexText | ConvertFrom-Json
+$workspaceId = $indexPayload.code.workspace_id
+
+Write-Step "verified capsule cache"
+& $projectPython -m ctx_engine.cli cache verify $workspaceId --strict
 
 Write-Step "docs scan strict"
 & $projectPython -m ctx_engine.cli docs-scan --strict

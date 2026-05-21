@@ -30,6 +30,7 @@ from .rules_check import check_rules_drift
 from .security_scan import SUPPORTED_SCANNERS, scan_security
 from .server import serve
 from .skill_pack import build_skill_pack, list_skill_packs, render_skill_pack, write_skill_pack
+from .verified_cache import verify_capsule_cache
 from .workflow import list_workflows, show_workflow, suggest_workflow
 from .workspace import get_workspace, list_workspaces, register_workspace
 
@@ -392,6 +393,16 @@ def cmd_skill_pack(args: argparse.Namespace) -> int:
     raise SystemExit("unknown skill-pack command")
 
 
+def cmd_cache(args: argparse.Namespace) -> int:
+    if args.cache_command != "verify":
+        raise SystemExit("unknown cache command")
+    result = verify_capsule_cache(workspace_id=args.workspace_id, limit=args.limit)
+    print_json(result)
+    if args.strict:
+        return 0 if result["status"] == "ok" else 1
+    return 0
+
+
 def cmd_ledger(args: argparse.Namespace) -> int:
     ledger = ActionLedger()
     if args.ledger_command == "tail":
@@ -639,6 +650,14 @@ def build_parser() -> argparse.ArgumentParser:
     skill_pack_generate.add_argument("--format", choices=["json", "markdown"], default="json")
     skill_pack_generate.add_argument("--output", help="Write SKILL.md and skill-pack.json to this directory.")
     skill_pack_generate.set_defaults(func=cmd_skill_pack)
+
+    cache = sub.add_parser("cache")
+    cache_sub = cache.add_subparsers(dest="cache_command", required=True)
+    cache_verify = cache_sub.add_parser("verify")
+    cache_verify.add_argument("workspace_id", nargs="?")
+    cache_verify.add_argument("--limit", type=int, default=100)
+    cache_verify.add_argument("--strict", action="store_true", help="Return non-zero when stale or invalid capsule cache entries are found.")
+    cache_verify.set_defaults(func=cmd_cache)
 
     ledger = sub.add_parser("ledger")
     ledger_sub = ledger.add_subparsers(dest="ledger_command", required=True)

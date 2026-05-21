@@ -41,6 +41,40 @@ class CacheProvider:
         finally:
             conn.close()
 
+    def list_namespace(self, namespace: str, limit: int = 100) -> list[dict[str, object]]:
+        conn = init_db(connect())
+        try:
+            rows = conn.execute(
+                """
+                SELECT namespace, key, value_json, created_at, expires_at
+                FROM caches
+                WHERE namespace = ?
+                ORDER BY created_at DESC
+                LIMIT ?
+                """,
+                (namespace, max(1, int(limit))),
+            ).fetchall()
+            return [self._row(row) for row in rows]
+        finally:
+            conn.close()
+
+    def list_by_prefix(self, namespace_prefix: str, limit: int = 100) -> list[dict[str, object]]:
+        conn = init_db(connect())
+        try:
+            rows = conn.execute(
+                """
+                SELECT namespace, key, value_json, created_at, expires_at
+                FROM caches
+                WHERE namespace LIKE ?
+                ORDER BY created_at DESC
+                LIMIT ?
+                """,
+                (f"{namespace_prefix}%", max(1, int(limit))),
+            ).fetchall()
+            return [self._row(row) for row in rows]
+        finally:
+            conn.close()
+
     def clear_namespace(self, namespace: str) -> int:
         conn = init_db(connect())
         try:
@@ -52,3 +86,9 @@ class CacheProvider:
 
     def clear_capsule_workspace(self, workspace_id: str) -> int:
         return self.clear_namespace(capsule_namespace(workspace_id))
+
+    @staticmethod
+    def _row(row) -> dict[str, object]:
+        data = dict(row)
+        data["value"] = json.loads(data.pop("value_json") or "{}")
+        return data

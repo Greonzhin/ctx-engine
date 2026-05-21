@@ -12,10 +12,10 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `hooks`, `feedback`, `skill-pack`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
-- Code/docs index hashes included in capsule cache keys to avoid stale context after re-indexing
+- Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
 - Local docs provider for README, AGENTS, CLAUDE, GEMINI, docs, ADR, architecture, runbooks, and OpenAPI files
 - Context7 public-docs provider guard and cache; live fetch is opt-in with `CTX_ENGINE_CONTEXT7_LIVE=1`
 - Prompt-injection scanner for local docs and Context7 public-doc snippets
@@ -75,6 +75,7 @@ ctx rules check . --strict
 ctx hooks plan all
 ctx feedback report
 ctx skill-pack generate fix-failing-test --format markdown
+ctx cache verify --strict
 ctx compress-log failing-test.log
 ctx doctor --strict
 ctx mcp-check
@@ -182,15 +183,15 @@ P1 candidates:
 - Codex/Claude/Gemini safe hook advisory plans; executable hook install remains current-doc-gated
 - egress reports and rules drift checks
 
-P2 optional paths now present behind explicit opt-in:
+P2 optional paths now present behind explicit opt-in or local verification:
 
 - LSP/SCIP semantic ingestion (`CTX_ENGINE_LSP_*`, `CTX_ENGINE_SCIP_*`)
 - optional KuzuDB backend selected with `CTX_ENGINE_GRAPH_BACKEND=kuzu`; SQLite remains the default and fallback
 - external Hindsight adapter selected with `CTX_ENGINE_MEMORY_PROVIDER=hindsight`; SQLite remains the default and fallback
+- verified capsule cache reports via `ctx cache verify`; capsule cache remains local SQLite
 
 Remaining P2 candidates:
 
-- verified semantic cache
 - dashboard
 - policy engine
 - multi-project workspace manager
@@ -212,6 +213,7 @@ ctx rules check . --strict
 ctx hooks plan all
 ctx feedback report
 ctx skill-pack list
+ctx cache verify --strict
 ctx compress-log failing-test.log
 ctx mcp-check
 ctx mcp-lint
