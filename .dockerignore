@@ -1,0 +1,12 @@
+.venv/
+.pytest_cache/
+.tmp/
+.tmp-smoke-data/
+.ctx-engine/
+.ctx-engine-data/
+HOME_CONTINUE/
+output/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

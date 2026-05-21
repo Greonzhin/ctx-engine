@@ -1,0 +1,22 @@
+services:
+  ctx-engine:
+    build: .
+    image: ctx-engine:dev
+    container_name: ctx-engine
+    user: "10001:10001"
+    command: ["ctx", "serve", "--host", "0.0.0.0", "--port", "7331", "--mode", "${CTX_ENGINE_MODE:-safe}"]
+    ports:
+      - "127.0.0.1:7331:7331"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:7331/health', timeout=2).read()"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    volumes:
+      - ./:/workspace:ro
+      - ${HOME:-~}/.ctx-engine:/data
+    environment:
+      CTX_ENGINE_IN_DOCKER: "1"
+      CTX_ENGINE_DATA_DIR: /data
+      CTX_ENGINE_WORKSPACE_ROOT: /workspace

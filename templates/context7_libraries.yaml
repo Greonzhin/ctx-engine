@@ -1,0 +1,39 @@
+libraries:
+  codex:
+    id: /openai/codex
+  claude-code:
+    id: /anthropics/claude-code
+  context7:
+    id: /upstash/context7
+  docker:
+    id: /docker/docs
+  gemini-cli:
+    id: /google-gemini/gemini-cli
+  mcp-python-sdk:
+    id: /modelcontextprotocol/python-sdk
+  python:
+    id: /python/cpython
+  next:
+    id: /vercel/next.js
+  react:
+    id: /facebook/react
+  supabase:
+    id: /supabase/supabase
+  fastapi:
+    id: /tiangolo/fastapi
+  pydantic:
+    id: /pydantic/pydantic
+  pytest:
+    id: /pytest-dev/pytest
+  py-tree-sitter:
+    id: /tree-sitter/py-tree-sitter
+  setuptools:
+    id: /pypa/setuptools
+  tree-sitter-language-pack:
+    id: /kreuzberg-dev/tree-sitter-language-pack
+
+policy:
+  public_docs_only: true
+  never_send_private_source: true
+  redact_query_before_send: true
+  cache_docs: true

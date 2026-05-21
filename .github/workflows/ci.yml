@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: python-quality-gate
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dev package
+        shell: pwsh
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run full test suite
+        shell: pwsh
+        run: |
+          $testTmp = Join-Path $env:RUNNER_TEMP ("pytest-" + [guid]::NewGuid().ToString("N"))
+          python -m pytest -q --basetemp $testTmp
+
+      - name: Run semantic quality gate
+        shell: pwsh
+        run: |
+          $testTmp = Join-Path $env:RUNNER_TEMP ("pytest-" + [guid]::NewGuid().ToString("N"))
+          python -m pytest -q --basetemp $testTmp tests/test_semantic_quality_gate.py tests/test_retrieval_benchmark.py
+
+  docker:
+    name: docker-runtime-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dev package
+        shell: pwsh
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run Docker runtime smoke
+        shell: pwsh
+        run: ./scripts/docker_smoke.ps1

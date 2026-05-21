@@ -1,0 +1,8 @@
+{
+  "name": "ts-fixture",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}

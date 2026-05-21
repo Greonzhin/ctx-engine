@@ -1,0 +1,14 @@
+{
+  "mcp": {
+    "allowed": [
+      "ctx-engine"
+    ]
+  },
+  "mcpServers": {
+    "ctx-engine": {
+      "httpUrl": "http://127.0.0.1:7331/mcp",
+      "timeout": 30000,
+      "trust": false
+    }
+  }
+}
