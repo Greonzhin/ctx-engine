@@ -312,7 +312,7 @@ def cmd_security_scan(args: argparse.Namespace) -> int:
         timeout=args.timeout,
     )
     print_json(result)
-    return 1 if args.strict and result["status"] != "pass" else 0
+    return 1 if args.strict and result["status"] in {"fail", "findings"} else 0
 
 
 def cmd_workflow(args: argparse.Namespace) -> int:

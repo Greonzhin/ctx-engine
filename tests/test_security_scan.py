@@ -68,6 +68,66 @@ def test_security_scan_normalizes_gitleaks_json(tmp_path, monkeypatch):
     assert result["findings"][0]["path"] == ".env"
 
 
+def test_security_scan_normalizes_secretlint_json(tmp_path, monkeypatch):
+    monkeypatch.setattr("ctx_engine.security_scan.shutil.which", lambda name: f"/bin/{name}")
+    payload = [{"filePath": "README.md", "messages": [{"ruleId": "@secretlint/secretlint-rule-example", "message": "secret", "line": 3, "severity": 2}]}]
+
+    def fake_run(command, timeout):
+        return subprocess.CompletedProcess(command, 1, stdout=json.dumps(payload), stderr="")
+
+    monkeypatch.setattr("ctx_engine.security_scan._run_command", fake_run)
+
+    result = scan_security(tmp_path, scanner="secretlint")
+
+    assert result["status"] == "findings"
+    assert result["findings"][0]["scanner"] == "secretlint"
+    assert result["findings"][0]["path"] == "README.md"
+
+
+def test_security_scan_normalizes_npm_audit_json(tmp_path, monkeypatch):
+    (tmp_path / "package.json").write_text('{"name":"demo","version":"0.0.0"}', encoding="utf-8")
+    monkeypatch.setattr("ctx_engine.security_scan.shutil.which", lambda name: f"/bin/{name}")
+    payload = {"vulnerabilities": {"lodash": {"name": "lodash", "severity": "high", "via": [{"source": 123, "title": "prototype pollution"}]}}}
+
+    def fake_run(command, timeout):
+        return subprocess.CompletedProcess(command, 1, stdout=json.dumps(payload), stderr="")
+
+    monkeypatch.setattr("ctx_engine.security_scan._run_command", fake_run)
+
+    result = scan_security(tmp_path, scanner="npm-audit")
+
+    assert result["status"] == "findings"
+    assert result["findings"][0]["scanner"] == "npm-audit"
+    assert result["findings"][0]["rule_id"] == "123"
+
+
+def test_security_scan_normalizes_pip_audit_json(tmp_path, monkeypatch):
+    (tmp_path / "requirements.txt").write_text("demo==0.1.0\n", encoding="utf-8")
+    monkeypatch.setattr("ctx_engine.security_scan.shutil.which", lambda name: f"/bin/{name}")
+    payload = {"dependencies": [{"name": "demo", "version": "0.1.0", "vulns": [{"id": "PYSEC-1", "description": "bad package"}]}]}
+
+    def fake_run(command, timeout):
+        return subprocess.CompletedProcess(command, 1, stdout=json.dumps(payload), stderr="")
+
+    monkeypatch.setattr("ctx_engine.security_scan._run_command", fake_run)
+
+    result = scan_security(tmp_path, scanner="pip-audit")
+
+    assert result["status"] == "findings"
+    assert result["findings"][0]["scanner"] == "pip-audit"
+    assert result["findings"][0]["rule_id"] == "PYSEC-1"
+
+
+def test_security_scan_skips_audit_scanner_without_manifest(tmp_path, monkeypatch):
+    monkeypatch.setattr("ctx_engine.security_scan.shutil.which", lambda name: f"/bin/{name}")
+
+    result = scan_security(tmp_path, scanner="npm-audit", strict=True)
+
+    assert result["status"] == "warn"
+    assert result["scanner_results"][0]["status"] == "skipped"
+    assert not result["errors"]
+
+
 def test_security_scan_cli_all_with_mocked_scanners(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr("ctx_engine.security_scan.shutil.which", lambda name: f"/bin/{name}")
 
@@ -75,11 +135,16 @@ def test_security_scan_cli_all_with_mocked_scanners(tmp_path, monkeypatch, capsy
         scanner = Path(command[0]).name
         if scanner == "semgrep":
             return subprocess.CompletedProcess(command, 0, stdout='{"results":[]}', stderr="")
-        return subprocess.CompletedProcess(command, 0, stdout="[]", stderr="")
+        if scanner == "gitleaks":
+            return subprocess.CompletedProcess(command, 0, stdout="[]", stderr="")
+        if scanner == "secretlint":
+            return subprocess.CompletedProcess(command, 0, stdout="[]", stderr="")
+        raise AssertionError(f"unexpected scanner command: {scanner}")
 
     monkeypatch.setattr("ctx_engine.security_scan._run_command", fake_run)
 
     assert main(["security-scan", str(tmp_path), "--all", "--strict"]) == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["status"] == "pass"
-    assert len(out["scanner_results"]) == 2
+    assert out["status"] == "warn"
+    assert len(out["scanner_results"]) == 5
+    assert {item["scanner"] for item in out["scanner_results"] if item["status"] == "skipped"} == {"npm-audit", "pip-audit"}

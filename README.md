@@ -20,6 +20,7 @@ Implemented:
 - Context7 public-docs provider guard and cache; live fetch is opt-in with `CTX_ENGINE_CONTEXT7_LIVE=1`
 - Prompt-injection scanner for local docs and Context7 public-doc snippets
 - Context7 egress event logging with reportable hashes/latency/status
+- Optional security scanner adapters for Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
 - Built-in Hindsight-inspired memory: retain, recall, reflect, verify, supersede
 - Internal RTK: token estimation, ranking, skeleton/snippet budget shaping
 - Docker safe/dev/offline/audit modes
@@ -171,7 +172,7 @@ P1 candidates:
 
 - MCP descriptor hash registry and allowlist quality gate
 - workflow recipes and local quality gate script
-- optional scanner adapters such as Semgrep and Gitleaks
+- optional scanner adapters: Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
 - test suggestion engine refinements
 - rules drift detection and deterministic terminal log compression
 - Codex/Claude/Gemini safe hook advisory plans; executable hook install remains current-doc-gated

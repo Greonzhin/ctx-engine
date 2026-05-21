@@ -90,7 +90,7 @@ def suggest_workflow(query: str) -> dict[str, Any]:
         "review-risky-change": _score(lower, ("review", "risk", "regression", "impact", "blast", "change")),
         "update-docs": _score(lower, ("docs", "documentation", "readme", "api", "adr", "guide")),
         "prepare-pr": _score(lower, ("pr", "pull request", "handoff", "release", "summary", "ci")),
-        "security-audit": _score(lower, ("security", "audit", "secret", "mcp", "scanner", "semgrep", "gitleaks")),
+        "security-audit": _score(lower, ("security", "audit", "secret", "mcp", "scanner", "semgrep", "gitleaks", "secretlint", "npm", "pip-audit")),
     }
     selected = sorted(scores.items(), key=lambda item: (-item[1], item[0]))[0][0]
     if scores[selected] == 0:
