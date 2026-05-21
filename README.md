@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `hooks`, `feedback`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `hooks`, `feedback`, `skill-pack`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys to avoid stale context after re-indexing
@@ -28,7 +28,7 @@ Implemented:
 - Codex, Claude, Gemini, and generic MCP adapter generation
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
-- Built-in workflow recipes, generated-rules drift checks, safe hook advisory plans, capsule feedback, and deterministic log compression
+- Built-in workflow recipes, generated-rules drift checks, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
 
 Not implemented in P0:
 
@@ -74,6 +74,7 @@ ctx workflow suggest "fix failing auth test"
 ctx rules check . --strict
 ctx hooks plan all
 ctx feedback report
+ctx skill-pack generate fix-failing-test --format markdown
 ctx compress-log failing-test.log
 ctx doctor --strict
 ctx mcp-check
@@ -176,6 +177,7 @@ P1 candidates:
 - optional scanner adapters: Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
 - test suggestion engine refinements
 - capsule feedback
+- advisory skill pack generator
 - rules drift detection and deterministic terminal log compression
 - Codex/Claude/Gemini safe hook advisory plans; executable hook install remains current-doc-gated
 - egress reports and rules drift checks
@@ -209,6 +211,7 @@ ctx workflow list
 ctx rules check . --strict
 ctx hooks plan all
 ctx feedback report
+ctx skill-pack list
 ctx compress-log failing-test.log
 ctx mcp-check
 ctx mcp-lint

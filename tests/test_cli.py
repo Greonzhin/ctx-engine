@@ -85,6 +85,10 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     feedback = json.loads(capsys.readouterr().out)
     assert feedback["status"] == "ok"
 
+    assert main(["skill-pack", "list"]) == 0
+    skill_packs = json.loads(capsys.readouterr().out)
+    assert skill_packs["status"] == "ok"
+
     assert main(["retrieval-benchmark", str(fixture_root / "python_app"), "--top-k", "3"]) == 0
     retrieval = json.loads(capsys.readouterr().out)
     assert retrieval["status"] == "ok"

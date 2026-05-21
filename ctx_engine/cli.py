@@ -29,6 +29,7 @@ from .retrieval_benchmark import run_retrieval_benchmark
 from .rules_check import check_rules_drift
 from .security_scan import SUPPORTED_SCANNERS, scan_security
 from .server import serve
+from .skill_pack import build_skill_pack, list_skill_packs, render_skill_pack, write_skill_pack
 from .workflow import list_workflows, show_workflow, suggest_workflow
 from .workspace import get_workspace, list_workspaces, register_workspace
 
@@ -377,6 +378,20 @@ def cmd_feedback(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_skill_pack(args: argparse.Namespace) -> int:
+    if args.skill_pack_command == "list":
+        print_json(list_skill_packs())
+        return 0
+    if args.skill_pack_command == "generate":
+        pack = build_skill_pack(args.name_or_query)
+        if args.output:
+            print_json(write_skill_pack(pack, args.output))
+        else:
+            print(render_skill_pack(pack, args.format))
+        return 0
+    raise SystemExit("unknown skill-pack command")
+
+
 def cmd_ledger(args: argparse.Namespace) -> int:
     ledger = ActionLedger()
     if args.ledger_command == "tail":
@@ -614,6 +629,16 @@ def build_parser() -> argparse.ArgumentParser:
     feedback_report.add_argument("--workspace-id")
     feedback_report.add_argument("--limit", type=int, default=50)
     feedback_report.set_defaults(func=cmd_feedback)
+
+    skill_pack = sub.add_parser("skill-pack")
+    skill_pack_sub = skill_pack.add_subparsers(dest="skill_pack_command", required=True)
+    skill_pack_list = skill_pack_sub.add_parser("list")
+    skill_pack_list.set_defaults(func=cmd_skill_pack)
+    skill_pack_generate = skill_pack_sub.add_parser("generate")
+    skill_pack_generate.add_argument("name_or_query")
+    skill_pack_generate.add_argument("--format", choices=["json", "markdown"], default="json")
+    skill_pack_generate.add_argument("--output", help="Write SKILL.md and skill-pack.json to this directory.")
+    skill_pack_generate.set_defaults(func=cmd_skill_pack)
 
     ledger = sub.add_parser("ledger")
     ledger_sub = ledger.add_subparsers(dest="ledger_command", required=True)
