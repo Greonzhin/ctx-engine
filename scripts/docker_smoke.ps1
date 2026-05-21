@@ -31,6 +31,24 @@ function Invoke-Compose {
   & docker compose @Arguments
 }
 
+function Initialize-DataMount {
+  $homeDir = $env:HOME
+  if (-not $homeDir) {
+    $homeDir = $env:USERPROFILE
+  }
+  if (-not $homeDir) {
+    throw "HOME veya USERPROFILE bulunamadi; Docker /data mount hazirlanamadi"
+  }
+
+  $dataDir = Join-Path $homeDir ".ctx-engine"
+  New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
+
+  $isWindowsPlatform = [System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT
+  if (-not $isWindowsPlatform) {
+    & chmod 777 $dataDir
+  }
+}
+
 function Show-ComposeLogs {
   try {
     Write-Host ""
@@ -91,6 +109,9 @@ except OSError:
 
 $failed = $false
 try {
+  Write-Step "host data mount hazirlaniyor"
+  Initialize-DataMount
+
   Write-Step "docker compose config"
   Invoke-Compose @("config") | Out-Host
 
@@ -113,7 +134,8 @@ try {
   Write-Host "Docker smoke tamam."
 } catch {
   $failed = $true
-  Write-Error $_
+  Write-Host ""
+  Write-Host "Docker smoke failed: $($_.Exception.Message)" -ForegroundColor Red
   Show-ComposeLogs
 } finally {
   if (-not $KeepRunning) {
