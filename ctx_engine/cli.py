@@ -33,7 +33,7 @@ from .server import serve
 from .skill_pack import build_skill_pack, list_skill_packs, render_skill_pack, write_skill_pack
 from .verified_cache import verify_capsule_cache
 from .workflow import list_workflows, show_workflow, suggest_workflow
-from .workspace import get_workspace, list_workspaces, register_workspace
+from .workspace import clear_active_workspace, get_workspace, list_workspaces, register_workspace, set_active_workspace, workspace_inventory
 
 
 def client_adapters() -> dict[str, object]:
@@ -77,6 +77,38 @@ def cmd_status(args: argparse.Namespace) -> int:
     workspaces = list_workspaces()
     print_json({"workspaces": workspaces, "default_workspace": get_workspace()})
     return 0
+
+
+def cmd_workspace(args: argparse.Namespace) -> int:
+    if args.workspace_command == "list":
+        print_json(workspace_inventory())
+        return 0
+    if args.workspace_command == "add":
+        result = register_workspace(args.path, display_name=args.name)
+        activated = False
+        if args.activate:
+            result = set_active_workspace(result["id"])
+            activated = True
+        print_json({"status": "ok", "workspace": result, "activated": activated})
+        return 0
+    if args.workspace_command == "use":
+        workspace = set_active_workspace(args.workspace)
+        print_json({"status": "ok", "active_workspace": workspace})
+        return 0
+    if args.workspace_command == "show":
+        print_json({"status": "ok", "active_workspace": get_workspace()})
+        return 0
+    if args.workspace_command == "clear":
+        clear_active_workspace()
+        print_json({"status": "ok", "active_workspace": get_workspace()})
+        return 0
+    if args.workspace_command == "check":
+        result = workspace_inventory()
+        print_json(result)
+        if args.strict:
+            return 0 if result["status"] == "ok" and result["workspace_count"] > 0 else 1
+        return 0
+    raise SystemExit("unknown workspace command")
 
 
 def cmd_capsule(args: argparse.Namespace) -> int:
@@ -441,6 +473,26 @@ def build_parser() -> argparse.ArgumentParser:
 
     status = sub.add_parser("status")
     status.set_defaults(func=cmd_status)
+
+    workspace = sub.add_parser("workspace")
+    workspace_sub = workspace.add_subparsers(dest="workspace_command", required=True)
+    workspace_list = workspace_sub.add_parser("list")
+    workspace_list.set_defaults(func=cmd_workspace)
+    workspace_add = workspace_sub.add_parser("add")
+    workspace_add.add_argument("path")
+    workspace_add.add_argument("--name")
+    workspace_add.add_argument("--activate", action="store_true")
+    workspace_add.set_defaults(func=cmd_workspace)
+    workspace_use = workspace_sub.add_parser("use")
+    workspace_use.add_argument("workspace", help="Workspace id or path inside a registered workspace.")
+    workspace_use.set_defaults(func=cmd_workspace)
+    workspace_show = workspace_sub.add_parser("show")
+    workspace_show.set_defaults(func=cmd_workspace)
+    workspace_clear = workspace_sub.add_parser("clear")
+    workspace_clear.set_defaults(func=cmd_workspace)
+    workspace_check = workspace_sub.add_parser("check")
+    workspace_check.add_argument("--strict", action="store_true", help="Return non-zero when no workspace exists or a registered path is missing.")
+    workspace_check.set_defaults(func=cmd_workspace)
 
     capsule = sub.add_parser("capsule")
     capsule.add_argument("query")

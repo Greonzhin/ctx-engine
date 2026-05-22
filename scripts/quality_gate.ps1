@@ -74,6 +74,9 @@ Write-Host $indexText
 $indexPayload = $indexText | ConvertFrom-Json
 $workspaceId = $indexPayload.code.workspace_id
 
+Write-Step "workspace manager check"
+& $projectPython -m ctx_engine.cli workspace check --strict
+
 Write-Step "verified capsule cache"
 & $projectPython -m ctx_engine.cli cache verify $workspaceId --strict
 

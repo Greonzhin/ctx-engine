@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
@@ -28,7 +28,7 @@ Implemented:
 - Codex, Claude, Gemini, and generic MCP adapter generation
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
-- Built-in workflow recipes, generated-rules drift checks, local policy checks, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
+- Built-in workflow recipes, generated-rules drift checks, local policy checks, multi-project workspace management, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
 
 Not implemented in P0:
 
@@ -36,8 +36,8 @@ Not implemented in P0:
 - KuzuDB real backend as default (sqlite is default; optional backend path is additive)
 - Neo4j
 - dashboard
-- policy engine
-- verified semantic cache
+- required policy engine in P0 (local P2 policy checks are available)
+- required verified semantic cache in P0 (local P2 cache verification is available)
 - shell or write tools
 - downstream untrusted MCP gatewaying
 
@@ -70,6 +70,9 @@ ctx install gemini
 ctx install status
 ctx client-check --run
 ctx security-scan . --all
+ctx workspace list
+ctx workspace use <workspace-id-or-path>
+ctx workspace check --strict
 ctx workflow suggest "fix failing auth test"
 ctx rules check . --strict
 ctx policy check . --strict
@@ -191,11 +194,11 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - external Hindsight adapter selected with `CTX_ENGINE_MEMORY_PROVIDER=hindsight`; SQLite remains the default and fallback
 - verified capsule cache reports via `ctx cache verify`; capsule cache remains local SQLite
 - local policy checks via `ctx policy check . --strict`
+- multi-project workspace manager via `ctx workspace list/use/check`
 
 Remaining P2 candidates:
 
 - dashboard
-- multi-project workspace manager
 
 These remain outside the P0 default path; optional P2 integrations must be explicitly enabled.
 
@@ -209,6 +212,8 @@ ctx doctor --strict
 ctx install status
 ctx client-check
 ctx security-scan . --all
+ctx workspace list
+ctx workspace check --strict
 ctx workflow list
 ctx rules check . --strict
 ctx policy check . --strict
