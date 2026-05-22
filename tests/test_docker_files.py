@@ -60,5 +60,6 @@ def test_client_and_external_runtime_smoke_scripts_exist():
     assert "mcp-lint --strict" in quality
     assert "ci status" in quality
     assert "decisions report" in quality
+    assert "migration plan" in quality
     assert "structural-search" in quality
     assert "docker_smoke.ps1" in quality

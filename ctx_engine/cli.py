@@ -16,6 +16,7 @@ from .doctor import doctor_status
 from .hooks import SUPPORTED_HOOK_CLIENTS, hook_plan
 from .inspector_smoke import inspector_smoke
 from .log_compression import compress_log_file, compress_log_text
+from .migration_assistant import migration_plan
 from .mcp_contract import check_gateway_contract, check_http_gateway_contract
 from .mcp_lint import lint_gateway_tools
 from .pathmap import check_paths, map_path
@@ -203,6 +204,16 @@ def cmd_memory(args: argparse.Namespace) -> int:
         )
     else:
         raise SystemExit("unknown memory command")
+    return 0
+
+
+def cmd_migration(args: argparse.Namespace) -> int:
+    if args.migration_command != "plan":
+        raise SystemExit("unknown migration command")
+    result = migration_plan(args.query, path=args.path, workspace_id=args.workspace_id, limit=args.limit)
+    print_json(result)
+    if args.strict:
+        return 0 if result["status"] == "ok" and bool(result.get("selected_files")) else 1
     return 0
 
 
@@ -610,6 +621,16 @@ def build_parser() -> argparse.ArgumentParser:
     memory_report.add_argument("--agent-namespace")
     memory_report.add_argument("--limit", type=int, default=10)
     memory_report.set_defaults(func=cmd_memory)
+
+    migration = sub.add_parser("migration")
+    migration_sub = migration.add_subparsers(dest="migration_command", required=True)
+    migration_plan_parser = migration_sub.add_parser("plan")
+    migration_plan_parser.add_argument("query")
+    migration_plan_parser.add_argument("path", nargs="?", default=".")
+    migration_plan_parser.add_argument("--workspace-id")
+    migration_plan_parser.add_argument("--limit", type=int, default=20)
+    migration_plan_parser.add_argument("--strict", action="store_true", help="Return non-zero when no indexed files match the migration query.")
+    migration_plan_parser.set_defaults(func=cmd_migration)
 
     install = sub.add_parser("install")
     install.add_argument("client", choices=["codex", "claude", "gemini", "generic", "status"])

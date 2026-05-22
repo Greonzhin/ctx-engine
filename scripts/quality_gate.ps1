@@ -98,6 +98,9 @@ Write-Step "docs scan strict"
 Write-Step "decision graph report"
 & $projectPython -m ctx_engine.cli decisions report . --limit 20
 
+Write-Step "migration assistant plan"
+& $projectPython -m ctx_engine.cli migration plan "gateway migration" . --limit 10
+
 Write-Step "context7 egress report"
 & $projectPython -m ctx_engine.cli egress-report --provider context7
 

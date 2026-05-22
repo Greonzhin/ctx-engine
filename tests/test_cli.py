@@ -104,6 +104,11 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     memory = json.loads(capsys.readouterr().out)
     assert memory["status"] == "ok"
 
+    assert main(["migration", "plan", "authenticate request", str(fixture_root / "python_app")]) == 0
+    migration = json.loads(capsys.readouterr().out)
+    assert migration["status"] == "ok"
+    assert "phases" in migration
+
     assert main(["skill-pack", "list"]) == 0
     skill_packs = json.loads(capsys.readouterr().out)
     assert skill_packs["status"] == "ok"

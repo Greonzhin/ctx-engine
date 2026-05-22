@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `decisions`, `memory`, `install`, `client-check`, `ci`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `decisions`, `memory`, `migration`, `install`, `client-check`, `ci`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
@@ -33,6 +33,7 @@ Implemented:
 - Project convention reports for languages, source/test roots, imports, route-like symbols, and test symbols
 - Local CI provider reports for GitHub Actions workflow inventory and optional `gh` run status
 - Local ADR/decision graph reports from docs, README, runbooks, and architecture notes
+- Local migration plans combining code graph, docs, decisions, conventions, and test signals
 - Built-in workflow recipes, generated-rules drift checks, local policy checks, multi-project workspace management, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
 
 Not implemented in P0:
@@ -88,6 +89,7 @@ ctx policy check . --strict
 ctx hooks plan all
 ctx feedback report
 ctx memory report
+ctx migration plan "migrate auth middleware" .
 ctx skill-pack generate fix-failing-test --format markdown
 ctx cache verify --strict
 ctx compress-log failing-test.log
@@ -201,6 +203,7 @@ P1 candidates:
 - optional read-only structural search adapter via ast-grep
 - local CI provider for GitHub Actions workflow inventory and optional `gh run list`
 - ADR/decision graph report from local docs
+- migration assistant plans that combine docs, code graph, decisions, conventions, and tests
 - test suggestion engine refinements
 - project convention extraction for source roots, test roots, imports, and route-like symbols
 - capsule feedback
@@ -221,6 +224,7 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - read-only structural search via `ctx structural-search` when ast-grep is installed
 - CI provider status via `ctx ci status`; live GitHub run checks require explicit `--run`
 - ADR/decision graph report via `ctx decisions report`
+- migration assistant via `ctx migration plan`
 
 Remaining P2 candidates:
 
@@ -249,6 +253,7 @@ ctx policy check . --strict
 ctx hooks plan all
 ctx feedback report
 ctx memory report
+ctx migration plan "migrate auth middleware" .
 ctx skill-pack list
 ctx cache verify --strict
 ctx compress-log failing-test.log
