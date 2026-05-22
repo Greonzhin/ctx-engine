@@ -31,7 +31,7 @@ Implemented:
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
 - Project convention reports for languages, source/test roots, imports, route-like symbols, and test symbols
-- Local CI provider reports for GitHub Actions workflow inventory, optional `gh` run status, zero-step failure diagnostics, and short diagnosis summaries
+- Local CI provider reports for GitHub Actions workflow inventory, optional `gh` run status, and zero-step failure diagnostics
 - Local ADR/decision graph reports from docs, README, runbooks, and architecture notes
 - Local migration plans combining code graph, docs, decisions, conventions, and test signals
 - Local context export/import manifests for workspace metadata, decisions, memory, and optional ledger entries
@@ -209,7 +209,7 @@ P1 candidates:
 - workflow recipes and local quality gate script
 - optional scanner adapters: Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
 - optional read-only structural search adapter via ast-grep
-- local CI provider for GitHub Actions workflow inventory, optional `gh run list`, failed job diagnostics, and handoff-ready diagnosis summaries
+- local CI provider for GitHub Actions workflow inventory, optional `gh run list`, and failed job diagnostics
 - ADR/decision graph report from local docs
 - migration assistant plans that combine docs, code graph, decisions, conventions, and tests
 - context export/import manifests for local handoff and memory restore
@@ -232,7 +232,7 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - multi-project workspace manager via `ctx workspace list/use/check`
 - local read-only dashboard via `http://127.0.0.1:7331/dashboard`, including P2 operations and identity summaries
 - read-only structural search via `ctx structural-search` when ast-grep is installed
-- CI provider status via `ctx ci status`; live GitHub run and failed-job diagnostics require explicit `--run`, and the `diagnosis` field summarizes the likely CI state
+- CI provider status via `ctx ci status`; live GitHub run and failed-job diagnostics require explicit `--run`
 - ADR/decision graph report via `ctx decisions report`
 - migration assistant via `ctx migration plan`
 - context export/import via `ctx context export` and dry-run `ctx context import`
