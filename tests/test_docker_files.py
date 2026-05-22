@@ -49,8 +49,12 @@ def test_client_and_external_runtime_smoke_scripts_exist():
     client = (root / "scripts" / "client_smoke.ps1").read_text(encoding="utf-8")
     external = (root / "scripts" / "external_runtime_smoke.ps1").read_text(encoding="utf-8")
     quality = (root / "scripts" / "quality_gate.ps1").read_text(encoding="utf-8")
+    private_beta = (root / "scripts" / "private_beta_gate.ps1").read_text(encoding="utf-8")
 
     assert "client-check" in client
+    assert "adapter config status" in client
+    assert "Docker gateway health" in client
+    assert "Private beta manual client acceptance" in client
     assert "claude mcp get ctx-engine" in client
     assert "gemini mcp list" in client
     assert "Kuzu real-runtime smoke" in external
@@ -66,3 +70,10 @@ def test_client_and_external_runtime_smoke_scripts_exist():
     assert "context import" in quality
     assert "structural-search" in quality
     assert "docker_smoke.ps1" in quality
+    assert "quality_gate.ps1" in private_beta
+    assert "client_smoke.ps1" in private_beta
+    assert "ci status . --run --limit 3" in private_beta
+    assert "empty_step_failures" in private_beta
+    assert "GitHub Actions zero-step failure" in private_beta
+    assert "git status --short --branch" in private_beta
+    assert "Release note fields" in private_beta

@@ -164,10 +164,12 @@ Additional local verification helpers:
 .\scripts\client_smoke.ps1 -UseDocker -RunClients
 .\scripts\external_runtime_smoke.ps1
 .\scripts\quality_gate.ps1
+.\scripts\private_beta_gate.ps1
 ```
 
 `client_smoke.ps1` verifies generated adapter status and can run installed Codex/Claude/Gemini client probes. `external_runtime_smoke.ps1` verifies Kuzu and reports optional Hindsight/LSP/SCIP runtime probes when their environment variables are configured.
 `quality_gate.ps1` runs the local P1 gate; pass `-RunSecurityScanners` to require installed Semgrep and Gitleaks.
+`private_beta_gate.ps1` runs the local release gate for private beta: quality gate, Docker/client smoke, live GitHub Actions status, and clean git worktree verification.
 
 ## MCP Tools
 
@@ -244,6 +246,15 @@ Remaining P2 candidates:
 
 These remain outside the P0 default path; optional P2 integrations must be explicitly enabled.
 
+P3 private beta productization:
+
+- Target: private GitHub repo + local `ctx-engine:dev` Docker image + real Codex/Claude/Gemini client checks.
+- Gate: `scripts/private_beta_gate.ps1` must pass before tagging a private beta candidate.
+- Acceptance: local quality gate, Docker smoke, client smoke, dashboard status, MCP contract, and clean git worktree.
+- Release note fields: commit hash, image tag, quality gate result, Docker smoke result, client smoke result, and known GitHub Actions issue.
+- Known issue: GitHub Actions currently reports failing jobs with zero recorded steps on this repo; `ctx ci status . --run` exposes those as `runtime.empty_step_failures`. Until the repository Actions setting, billing/spending limit, runner availability, or org policy is fixed, local gates are the private beta source of truth.
+- Runbook: see [Private Beta Runbook](docs/runbooks/private-beta.md).
+
 ## Verification
 
 ```bash
@@ -289,6 +300,7 @@ scripts/docker_smoke.ps1
 scripts/client_smoke.ps1
 scripts/external_runtime_smoke.ps1
 scripts/quality_gate.ps1
+scripts/private_beta_gate.ps1
 ```
 
 Semantic ingest toggles (optional):
