@@ -83,6 +83,9 @@ Write-Step "workspace manager check"
 Write-Step "project conventions"
 & $projectPython -m ctx_engine.cli conventions . --limit 5
 
+Write-Step "structural search adapter"
+& $projectPython -m ctx_engine.cli structural-search . --pattern 'def $FUNC($$$): $$$' --lang python --limit 5
+
 Write-Step "verified capsule cache"
 & $projectPython -m ctx_engine.cli cache verify $workspaceId --strict
 

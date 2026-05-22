@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
@@ -21,6 +21,7 @@ Implemented:
 - Prompt-injection scanner for local docs and Context7 public-doc snippets
 - Context7 egress event logging with reportable hashes/latency/status
 - Optional security scanner adapters for Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
+- Optional read-only structural search adapter for ast-grep
 - Built-in Hindsight-inspired memory: retain, recall, reflect, verify, supersede
 - Internal RTK: token estimation, ranking, skeleton/snippet budget shaping
 - Docker safe/dev/offline/audit modes
@@ -72,6 +73,7 @@ ctx install gemini
 ctx install status
 ctx client-check --run
 ctx security-scan . --all
+ctx structural-search . --pattern 'def $FUNC($$$): $$$' --lang python
 ctx workspace list
 ctx workspace use <workspace-id-or-path>
 ctx workspace check --strict
@@ -191,6 +193,7 @@ P1 candidates:
 - MCP descriptor hash registry and allowlist quality gate
 - workflow recipes and local quality gate script
 - optional scanner adapters: Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
+- optional read-only structural search adapter via ast-grep
 - test suggestion engine refinements
 - project convention extraction for source roots, test roots, imports, and route-like symbols
 - capsule feedback
@@ -208,6 +211,7 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - local policy checks via `ctx policy check . --strict`
 - multi-project workspace manager via `ctx workspace list/use/check`
 - local read-only dashboard via `http://127.0.0.1:7331/dashboard`
+- read-only structural search via `ctx structural-search` when ast-grep is installed
 
 Remaining P2 candidates:
 
@@ -225,6 +229,7 @@ ctx doctor --strict
 ctx install status
 ctx client-check
 ctx security-scan . --all
+ctx structural-search . --pattern 'def $FUNC($$$): $$$' --lang python
 ctx workspace list
 ctx workspace check --strict
 ctx workflow list

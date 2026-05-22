@@ -58,4 +58,5 @@ def test_client_and_external_runtime_smoke_scripts_exist():
     assert "CTX_ENGINE_LSP_" in external
     assert "CTX_ENGINE_SCIP_" in external
     assert "mcp-lint --strict" in quality
+    assert "structural-search" in quality
     assert "docker_smoke.ps1" in quality

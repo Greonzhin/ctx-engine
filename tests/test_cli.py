@@ -112,6 +112,12 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     assert policy["status"] in {"pass", "fail"}
     assert "checks" in policy
 
+    monkeypatch.setattr("ctx_engine.structural_search.shutil.which", lambda _name: None)
+    assert main(["structural-search", str(tmp_path), "--pattern", "def $FUNC($$$): $$$", "--lang", "python"]) == 0
+    structural = json.loads(capsys.readouterr().out)
+    assert structural["status"] == "warn"
+    assert structural["command_available"] is False
+
     assert main(["retrieval-benchmark", str(fixture_root / "python_app"), "--top-k", "3"]) == 0
     retrieval = json.loads(capsys.readouterr().out)
     assert retrieval["status"] == "ok"

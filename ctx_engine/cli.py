@@ -32,6 +32,7 @@ from .rules_check import check_rules_drift
 from .security_scan import SUPPORTED_SCANNERS, scan_security
 from .server import serve
 from .skill_pack import build_skill_pack, list_skill_packs, render_skill_pack, write_skill_pack
+from .structural_search import search_structural
 from .verified_cache import verify_capsule_cache
 from .workflow import list_workflows, show_workflow, suggest_workflow
 from .workspace import clear_active_workspace, get_workspace, list_workspaces, register_workspace, set_active_workspace, workspace_inventory
@@ -373,6 +374,19 @@ def cmd_security_scan(args: argparse.Namespace) -> int:
     return 1 if args.strict and result["status"] in {"fail", "findings"} else 0
 
 
+def cmd_structural_search(args: argparse.Namespace) -> int:
+    result = search_structural(
+        args.path,
+        pattern=args.pattern,
+        language=args.lang,
+        strict=args.strict,
+        timeout=args.timeout,
+        limit=args.limit,
+    )
+    print_json(result)
+    return 1 if args.strict and result["status"] == "fail" else 0
+
+
 def cmd_workflow(args: argparse.Namespace) -> int:
     if args.workflow_command == "list":
         print_json(list_workflows())
@@ -692,6 +706,15 @@ def build_parser() -> argparse.ArgumentParser:
     security_scan.add_argument("--timeout", type=float, default=60.0)
     security_scan.add_argument("--strict", action="store_true", help="Return non-zero for missing scanners, scanner errors, or findings.")
     security_scan.set_defaults(func=cmd_security_scan)
+
+    structural_search = sub.add_parser("structural-search")
+    structural_search.add_argument("path", nargs="?", default=".")
+    structural_search.add_argument("--pattern", required=True, help="ast-grep structural pattern, for example: 'def $FUNC($$$): $$$'.")
+    structural_search.add_argument("--lang", help="Optional ast-grep language hint, for example: python or typescript.")
+    structural_search.add_argument("--limit", type=int, default=50)
+    structural_search.add_argument("--timeout", type=float, default=30.0)
+    structural_search.add_argument("--strict", action="store_true", help="Return non-zero when ast-grep is unavailable or fails.")
+    structural_search.set_defaults(func=cmd_structural_search)
 
     workflow = sub.add_parser("workflow")
     workflow_sub = workflow.add_subparsers(dest="workflow_command", required=True)
