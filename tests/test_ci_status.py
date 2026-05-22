@@ -83,7 +83,24 @@ def test_ci_status_normalizes_gh_run_json_and_strict_failure(tmp_path, monkeypat
         }
     ]
 
+    jobs_payload = {
+        "jobs": [
+            {
+                "databaseId": 456,
+                "name": "python-quality-gate",
+                "status": "completed",
+                "conclusion": "failure",
+                "startedAt": "2026-05-22T12:00:01Z",
+                "completedAt": "2026-05-22T12:00:03Z",
+                "url": "https://github.example/job/456",
+                "steps": [],
+            }
+        ]
+    }
+
     def fake_run(command, cwd, timeout):
+        if command[:3] == ["gh", "run", "view"]:
+            return subprocess.CompletedProcess(command, 0, stdout=json.dumps(jobs_payload), stderr="")
         return subprocess.CompletedProcess(command, 0, stdout=json.dumps(payload), stderr="")
 
     monkeypatch.setattr("ctx_engine.ci_status._run_command", fake_run)
@@ -93,7 +110,10 @@ def test_ci_status_normalizes_gh_run_json_and_strict_failure(tmp_path, monkeypat
     assert result["status"] == "fail"
     assert result["runtime"]["runs"][0]["database_id"] == 123
     assert result["runtime"]["failing_runs"][0]["display_title"] == "bad change"
+    assert result["runtime"]["job_diagnostics"][0]["empty_step_jobs"][0]["name"] == "python-quality-gate"
+    assert result["runtime"]["empty_step_failures"][0]["step_count"] == 0
     assert "GitHub Actions has failing completed runs" in result["errors"]
+    assert any("zero recorded steps" in warning for warning in result["warnings"])
 
 
 def test_ci_status_cli(tmp_path, capsys):

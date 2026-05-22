@@ -118,6 +118,39 @@ def _parse_gh_runs(stdout: str) -> tuple[list[dict[str, Any]], list[str]]:
     return runs, []
 
 
+def _parse_run_jobs(stdout: str, run_id: object) -> tuple[dict[str, Any], list[str]]:
+    if not stdout.strip():
+        return {"run_id": run_id, "jobs": [], "empty_step_jobs": []}, []
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError as exc:
+        return {"run_id": run_id, "jobs": [], "empty_step_jobs": []}, [f"gh run view {run_id} returned non-JSON output: {exc}"]
+    if not isinstance(payload, dict):
+        return {"run_id": run_id, "jobs": [], "empty_step_jobs": []}, [f"gh run view {run_id} returned unexpected JSON shape"]
+
+    jobs: list[dict[str, Any]] = []
+    for item in payload.get("jobs", []):
+        if not isinstance(item, dict):
+            continue
+        steps = item.get("steps")
+        step_count = len(steps) if isinstance(steps, list) else 0
+        jobs.append(
+            {
+                "database_id": item.get("databaseId"),
+                "name": item.get("name") or "",
+                "status": item.get("status") or "",
+                "conclusion": item.get("conclusion") or "",
+                "started_at": item.get("startedAt") or "",
+                "completed_at": item.get("completedAt") or "",
+                "url": item.get("url") or "",
+                "step_count": step_count,
+            }
+        )
+
+    empty_step_jobs = [item for item in jobs if item.get("status") == "completed" and item.get("conclusion") == "failure" and item.get("step_count") == 0]
+    return {"run_id": run_id, "jobs": jobs, "empty_step_jobs": empty_step_jobs}, []
+
+
 def ci_status(
     path: str | Path = ".",
     provider: str = "github-actions",
@@ -184,6 +217,30 @@ def ci_status(
                     errors.append(f"gh run list returned exit code {completed.returncode}")
                 failing_runs = [item for item in runs if item.get("status") == "completed" and item.get("conclusion") == "failure"]
                 runtime["failing_runs"] = failing_runs
+                diagnostics: list[dict[str, Any]] = []
+                empty_step_failures: list[dict[str, Any]] = []
+                for run_item in failing_runs[: min(limit, 3)]:
+                    run_id = run_item.get("database_id")
+                    if not run_id:
+                        continue
+                    view_command = ["gh", "run", "view", str(run_id), "--json", "jobs"]
+                    try:
+                        view_completed = _run_command(view_command, root, timeout)
+                    except (OSError, subprocess.TimeoutExpired) as exc:
+                        message = f"gh run view {run_id} failed to run: {exc}"
+                        warnings.append(message)
+                        continue
+                    if view_completed.returncode != 0:
+                        warnings.append(f"gh run view {run_id} returned exit code {view_completed.returncode}")
+                        continue
+                    diagnostic, parse_warnings = _parse_run_jobs(view_completed.stdout, run_id)
+                    diagnostics.append(diagnostic)
+                    warnings.extend(parse_warnings)
+                    empty_step_failures.extend(diagnostic["empty_step_jobs"])
+                runtime["job_diagnostics"] = diagnostics
+                runtime["empty_step_failures"] = empty_step_failures
+                if empty_step_failures:
+                    warnings.append("GitHub Actions has failing jobs with zero recorded steps; this usually points to runner/platform setup before workflow steps start.")
                 if strict and failing_runs:
                     errors.append("GitHub Actions has failing completed runs")
 
