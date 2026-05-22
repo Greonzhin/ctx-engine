@@ -68,6 +68,11 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     assert impact["status"] == "ok"
     assert "impacted_files" in impact
 
+    assert main(["conventions"]) == 0
+    conventions = json.loads(capsys.readouterr().out)
+    assert conventions["status"] == "ok"
+    assert "languages" in conventions["summary"]
+
     assert main(["egress-report", "--provider", "context7"]) == 0
     egress = json.loads(capsys.readouterr().out)
     assert egress["status"] == "ok"

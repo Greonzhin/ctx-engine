@@ -12,6 +12,7 @@ from ..providers.build_test import BuildTestProvider
 from ..providers.cache import CacheProvider, capsule_namespace
 from ..providers.capsule_feedback import CapsuleFeedbackProvider
 from ..providers.code_graph import CodeGraphProvider
+from ..providers.conventions import ConventionProvider
 from ..providers.local_docs import LocalDocsProvider
 from ..providers.memory import BuiltInMemoryProvider
 from ..security.redaction import redact_text
@@ -29,6 +30,7 @@ class CapsuleBuilder:
         self.docs = LocalDocsProvider()
         self.memory = BuiltInMemoryProvider()
         self.build_test = BuildTestProvider()
+        self.conventions = ConventionProvider()
         self.feedback = CapsuleFeedbackProvider()
         self.ledger = ActionLedger()
         self.cache = CacheProvider()
@@ -76,6 +78,7 @@ class CapsuleBuilder:
         memory_context = self._memory(query, wid, budget["memory"])
         build_context = self.build_test.detect(root, [item["path"] for item in selected_files])
         workflow_context = suggest_workflow(query)
+        project_conventions = self.conventions.summarize(workspace_id=wid, limit=5)
 
         capsule_id = hashlib.sha256(
             json.dumps(
@@ -116,6 +119,7 @@ class CapsuleBuilder:
             "docs_context": docs_context,
             "memory_context": memory_context,
             "build_test_context": build_context,
+            "project_conventions": project_conventions,
             "workflow_context": workflow_context,
             "feedback_context": self.feedback.summary(capsule_id, workspace_id=wid),
             "risks": [
@@ -136,6 +140,7 @@ class CapsuleBuilder:
                     "LocalDocsProvider",
                     "BuiltInMemoryProvider",
                     "BuildTestProvider",
+                    "ConventionProvider",
                     "WorkflowProvider",
                     "CacheProvider",
                     "SafetyProvider",

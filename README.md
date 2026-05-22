@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
@@ -29,6 +29,7 @@ Implemented:
 - Codex, Claude, Gemini, and generic MCP adapter generation
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
+- Project convention reports for languages, source/test roots, imports, route-like symbols, and test symbols
 - Built-in workflow recipes, generated-rules drift checks, local policy checks, multi-project workspace management, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
 
 Not implemented in P0:
@@ -92,6 +93,7 @@ ctx pack-summary "where is auth handled?"
 ctx blast-radius "where is auth handled?"
 ctx semantic-refs authenticate_request
 ctx semantic-impact "where is auth handled?" --include-tests
+ctx conventions .
 ctx retrieval-benchmark . --top-k 3
 ctx serve --mode safe
 ```
@@ -189,6 +191,7 @@ P1 candidates:
 - workflow recipes and local quality gate script
 - optional scanner adapters: Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
 - test suggestion engine refinements
+- project convention extraction for source roots, test roots, imports, and route-like symbols
 - capsule feedback
 - advisory skill pack generator
 - rules drift detection and deterministic terminal log compression
@@ -240,6 +243,7 @@ ctx pack-summary "where is auth handled?"
 ctx blast-radius "where is auth handled?"
 ctx semantic-refs authenticate_request
 ctx semantic-impact "where is auth handled?" --include-tests
+ctx conventions .
 ctx retrieval-benchmark . --top-k 3
 pytest -q tests/test_semantic_quality_gate.py
 ctx benchmark "where is auth handled?"

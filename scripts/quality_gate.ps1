@@ -77,6 +77,9 @@ $workspaceId = $indexPayload.code.workspace_id
 Write-Step "workspace manager check"
 & $projectPython -m ctx_engine.cli workspace check --strict
 
+Write-Step "project conventions"
+& $projectPython -m ctx_engine.cli conventions . --limit 5
+
 Write-Step "verified capsule cache"
 & $projectPython -m ctx_engine.cli cache verify $workspaceId --strict
 

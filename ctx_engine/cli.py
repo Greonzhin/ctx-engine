@@ -21,6 +21,7 @@ from .policy import evaluate_policy
 from .providers.action_ledger import ActionLedger
 from .providers.capsule_feedback import CapsuleFeedbackProvider, VALID_FEEDBACK_RATINGS
 from .providers.code_graph import CodeGraphProvider
+from .providers.conventions import ConventionProvider
 from .providers.egress import EgressProvider
 from .providers.context7_docs import Context7DocsProvider
 from .providers.local_docs import LocalDocsProvider
@@ -333,6 +334,12 @@ def cmd_retrieval_benchmark(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_conventions(args: argparse.Namespace) -> int:
+    result = ConventionProvider().summarize(workspace_id=args.workspace_id, path=args.path, limit=args.limit)
+    print_json(result)
+    return 0 if result["status"] == "ok" else 1
+
+
 def cmd_client_check(args: argparse.Namespace) -> int:
     result = check_clients(args.path, adapter=args.adapter, run=args.run, timeout=args.timeout)
     print_json(result)
@@ -599,6 +606,12 @@ def build_parser() -> argparse.ArgumentParser:
     retrieval_benchmark.add_argument("--cases-file")
     retrieval_benchmark.add_argument("--top-k", type=int, default=3)
     retrieval_benchmark.set_defaults(func=cmd_retrieval_benchmark)
+
+    conventions = sub.add_parser("conventions")
+    conventions.add_argument("path", nargs="?", default=None)
+    conventions.add_argument("--workspace-id")
+    conventions.add_argument("--limit", type=int, default=8)
+    conventions.set_defaults(func=cmd_conventions)
 
     docs_scan = sub.add_parser("docs-scan")
     docs_scan.add_argument("--workspace-id")
