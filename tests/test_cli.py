@@ -90,6 +90,10 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     feedback = json.loads(capsys.readouterr().out)
     assert feedback["status"] == "ok"
 
+    assert main(["memory", "report", "--limit", "5"]) == 0
+    memory = json.loads(capsys.readouterr().out)
+    assert memory["status"] == "ok"
+
     assert main(["skill-pack", "list"]) == 0
     skill_packs = json.loads(capsys.readouterr().out)
     assert skill_packs["status"] == "ok"

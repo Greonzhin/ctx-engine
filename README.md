@@ -80,6 +80,7 @@ ctx rules check . --strict
 ctx policy check . --strict
 ctx hooks plan all
 ctx feedback report
+ctx memory report
 ctx skill-pack generate fix-failing-test --format markdown
 ctx cache verify --strict
 ctx compress-log failing-test.log
@@ -231,6 +232,7 @@ ctx rules check . --strict
 ctx policy check . --strict
 ctx hooks plan all
 ctx feedback report
+ctx memory report
 ctx skill-pack list
 ctx cache verify --strict
 ctx compress-log failing-test.log

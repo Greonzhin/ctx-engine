@@ -158,12 +158,19 @@ def cmd_memory(args: argparse.Namespace) -> int:
         print_json(
             provider.retain(
                 args.claim,
+                workspace_id=getattr(args, "workspace_id", None),
                 lifecycle_tier=getattr(args, "lifecycle_tier", None),
                 agent_namespace=getattr(args, "agent_namespace", "default"),
             )
         )
     elif args.memory_command == "search":
-        print_json(provider.recall(args.query, agent_namespace=getattr(args, "agent_namespace", "default")))
+        print_json(
+            provider.recall(
+                args.query,
+                workspace_id=getattr(args, "workspace_id", None),
+                agent_namespace=getattr(args, "agent_namespace", "default"),
+            )
+        )
     elif args.memory_command == "policy":
         print_json(
             provider.apply_lifecycle_policy(
@@ -171,6 +178,14 @@ def cmd_memory(args: argparse.Namespace) -> int:
                 agent_namespace=getattr(args, "agent_namespace", "default"),
                 hot_days=getattr(args, "hot_days", None),
                 warm_days=getattr(args, "warm_days", None),
+            )
+        )
+    elif args.memory_command == "report":
+        print_json(
+            provider.report(
+                workspace_id=getattr(args, "workspace_id", None),
+                agent_namespace=getattr(args, "agent_namespace", None),
+                limit=getattr(args, "limit", 10),
             )
         )
     else:
@@ -526,11 +541,13 @@ def build_parser() -> argparse.ArgumentParser:
     memory_sub = memory.add_subparsers(dest="memory_command", required=True)
     memory_add = memory_sub.add_parser("add")
     memory_add.add_argument("claim")
+    memory_add.add_argument("--workspace-id")
     memory_add.add_argument("--lifecycle-tier", choices=["hot", "warm", "cold"])
     memory_add.add_argument("--agent-namespace", default="default")
     memory_add.set_defaults(func=cmd_memory)
     memory_search = memory_sub.add_parser("search")
     memory_search.add_argument("query", nargs="?", default="")
+    memory_search.add_argument("--workspace-id")
     memory_search.add_argument("--agent-namespace", default="default")
     memory_search.set_defaults(func=cmd_memory)
     memory_policy = memory_sub.add_parser("policy")
@@ -539,6 +556,11 @@ def build_parser() -> argparse.ArgumentParser:
     memory_policy.add_argument("--hot-days", type=int)
     memory_policy.add_argument("--warm-days", type=int)
     memory_policy.set_defaults(func=cmd_memory)
+    memory_report = memory_sub.add_parser("report")
+    memory_report.add_argument("--workspace-id")
+    memory_report.add_argument("--agent-namespace")
+    memory_report.add_argument("--limit", type=int, default=10)
+    memory_report.set_defaults(func=cmd_memory)
 
     install = sub.add_parser("install")
     install.add_argument("client", choices=["codex", "claude", "gemini", "generic", "status"])

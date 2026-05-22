@@ -54,6 +54,9 @@ Write-Step "hook advisory plan"
 Write-Step "capsule feedback report"
 & $projectPython -m ctx_engine.cli feedback report --limit 5
 
+Write-Step "memory report"
+& $projectPython -m ctx_engine.cli memory report --limit 5
+
 Write-Step "skill pack generator"
 & $projectPython -m ctx_engine.cli skill-pack generate fix-failing-test
 

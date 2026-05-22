@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 
 from ..db import connect, init_db, now_iso, stable_json
@@ -136,6 +138,94 @@ class BuiltInMemoryProvider:
         memories = self.recall("", workspace_id, limit=50)
         return {"count": len(memories), "summary": f"{len(memories)} active project memories"}
 
+    def report(
+        self,
+        workspace_id: str | None = None,
+        agent_namespace: str | None = None,
+        limit: int = 10,
+    ) -> dict[str, object]:
+        workspace = get_workspace(workspace_id)
+        wid = str(workspace["id"]) if workspace else "global"
+        namespace = (agent_namespace or "").strip() or None
+        conn = init_db(connect())
+        try:
+            params: list[object] = [wid]
+            namespace_clause = ""
+            if namespace:
+                namespace_clause = " AND agent_namespace = ?"
+                params.append(namespace)
+            rows = conn.execute(
+                f"""
+                SELECT *
+                FROM memories
+                WHERE workspace_id = ?{namespace_clause}
+                ORDER BY created_at DESC
+                """,
+                tuple(params),
+            ).fetchall()
+        finally:
+            conn.close()
+
+        items = [self._row(row) for row in rows]
+        active = [item for item in items if not item.get("superseded_by")]
+        lifecycle_counts = Counter(str(item.get("lifecycle_tier") or "unknown") for item in active)
+        trust_counts = Counter(str(item.get("trust_tier") or "unknown") for item in active)
+        source_counts = Counter(str(item.get("source") or "unknown") for item in active)
+        namespace_counts = Counter(str(item.get("agent_namespace") or "default") for item in active)
+
+        claim_groups: dict[str, list[dict[str, object]]] = defaultdict(list)
+        for item in active:
+            claim_groups[self._claim_key(str(item.get("claim") or ""))].append(item)
+        conflict_candidates = [
+            {
+                "claim_key": key,
+                "count": len(group),
+                "memory_ids": [str(item.get("id")) for item in group[:limit]],
+                "claims": [str(item.get("claim")) for item in group[:limit]],
+            }
+            for key, group in sorted(claim_groups.items())
+            if key and len(group) > 1
+        ]
+
+        unverified = [item for item in active if str(item.get("trust_tier")) != "verified"]
+        recent = [
+            {
+                "id": item.get("id"),
+                "claim": item.get("claim"),
+                "trust_tier": item.get("trust_tier"),
+                "lifecycle_tier": item.get("lifecycle_tier"),
+                "agent_namespace": item.get("agent_namespace"),
+                "created_at": item.get("created_at"),
+                "last_verified_at": item.get("last_verified_at"),
+                "superseded_by": item.get("superseded_by"),
+            }
+            for item in items[:limit]
+        ]
+        return {
+            "status": "ok",
+            "provider_used": "sqlite",
+            "workspace_id": wid,
+            "agent_namespace": namespace,
+            "summary": {
+                "total": len(items),
+                "active": len(active),
+                "superseded": len(items) - len(active),
+                "unverified": len(unverified),
+                "verified": trust_counts.get("verified", 0),
+                "conflict_candidates": len(conflict_candidates),
+                "lifecycle_counts": dict(sorted(lifecycle_counts.items())),
+                "trust_counts": dict(sorted(trust_counts.items())),
+                "source_counts": dict(sorted(source_counts.items())),
+                "namespace_counts": dict(sorted(namespace_counts.items())),
+            },
+            "unverified_samples": [
+                {"id": item.get("id"), "claim": item.get("claim"), "trust_tier": item.get("trust_tier")}
+                for item in unverified[:limit]
+            ],
+            "conflict_candidates": conflict_candidates[:limit],
+            "recent": recent,
+        }
+
     def verify(self, memory_id_value: str, evidence: str) -> dict[str, object] | None:
         evidence_hash = hashlib.sha256(evidence.encode("utf-8")).hexdigest()
         conn = init_db(connect())
@@ -163,6 +253,10 @@ class BuiltInMemoryProvider:
             conn.commit()
         finally:
             conn.close()
+
+    @staticmethod
+    def _claim_key(value: str) -> str:
+        return " ".join(re.findall(r"[a-z0-9]+", value.lower()))
 
     def apply_lifecycle_policy(
         self,
