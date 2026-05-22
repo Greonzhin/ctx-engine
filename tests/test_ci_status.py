@@ -36,6 +36,7 @@ def test_ci_status_reads_github_actions_workflows(tmp_path):
     result = ci_status(tmp_path)
 
     assert result["status"] == "ok"
+    assert result["diagnosis"]["category"] == "ci-runtime-unchecked"
     assert result["workflow_count"] == 1
     assert result["workflows"][0]["name"] == "ci"
     assert result["workflows"][0]["triggers"] == ["pull_request", "push", "workflow_dispatch"]
@@ -60,6 +61,7 @@ def test_ci_status_run_missing_gh_warns_non_strict(tmp_path, monkeypatch):
     result = ci_status(tmp_path, run=True, strict=False)
 
     assert result["status"] == "warn"
+    assert result["diagnosis"]["category"] == "ci-runtime-unavailable"
     assert result["runtime"]["checked"] is True
     assert result["runtime"]["command_available"] is False
     assert "gh command is not available" in result["warnings"]
@@ -108,6 +110,7 @@ def test_ci_status_normalizes_gh_run_json_and_strict_failure(tmp_path, monkeypat
     result = ci_status(tmp_path, run=True, strict=True)
 
     assert result["status"] == "fail"
+    assert result["diagnosis"]["category"] == "ci-failed"
     assert result["runtime"]["runs"][0]["database_id"] == 123
     assert result["runtime"]["failing_runs"][0]["display_title"] == "bad change"
     assert result["runtime"]["job_diagnostics"][0]["empty_step_jobs"][0]["name"] == "python-quality-gate"
@@ -124,4 +127,52 @@ def test_ci_status_cli(tmp_path, capsys):
     assert main(["ci", "status", str(tmp_path)]) == 0
     out = json.loads(capsys.readouterr().out)
     assert out["status"] == "ok"
+    assert out["diagnosis"]["category"] == "ci-runtime-unchecked"
     assert out["workflow_count"] == 1
+
+
+def test_ci_status_diagnoses_zero_step_failures_without_strict(tmp_path, monkeypatch):
+    workflow_dir = tmp_path / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (workflow_dir / "ci.yml").write_text(WORKFLOW, encoding="utf-8")
+    monkeypatch.setattr("ctx_engine.ci_status.shutil.which", lambda name: f"/bin/{name}")
+    runs_payload = [
+        {
+            "databaseId": 999,
+            "workflowName": "ci",
+            "displayTitle": "platform issue",
+            "headBranch": "main",
+            "status": "completed",
+            "conclusion": "failure",
+            "createdAt": "2026-05-22T12:00:00Z",
+            "url": "https://github.example/run/999",
+        }
+    ]
+    jobs_payload = {
+        "jobs": [
+            {
+                "databaseId": 1000,
+                "name": "docker-runtime-smoke",
+                "status": "completed",
+                "conclusion": "failure",
+                "startedAt": "2026-05-22T12:00:01Z",
+                "completedAt": "2026-05-22T12:00:02Z",
+                "url": "https://github.example/job/1000",
+                "steps": [],
+            }
+        ]
+    }
+
+    def fake_run(command, cwd, timeout):
+        if command[:3] == ["gh", "run", "view"]:
+            return subprocess.CompletedProcess(command, 0, stdout=json.dumps(jobs_payload), stderr="")
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps(runs_payload), stderr="")
+
+    monkeypatch.setattr("ctx_engine.ci_status._run_command", fake_run)
+
+    result = ci_status(tmp_path, run=True, strict=False)
+
+    assert result["status"] == "warn"
+    assert result["diagnosis"]["category"] == "runner-platform-failure"
+    assert "before any workflow steps" in result["diagnosis"]["summary"]
+    assert result["diagnosis"]["recommended_actions"]

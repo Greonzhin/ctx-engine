@@ -151,6 +151,55 @@ def _parse_run_jobs(stdout: str, run_id: object) -> tuple[dict[str, Any], list[s
     return {"run_id": run_id, "jobs": jobs, "empty_step_jobs": empty_step_jobs}, []
 
 
+def _diagnose_ci(runtime: dict[str, Any], workflows: list[dict[str, Any]], warnings: list[str], errors: list[str]) -> dict[str, Any]:
+    if errors:
+        category = "ci-failed"
+        summary = "CI checks reported errors."
+    elif runtime.get("empty_step_failures"):
+        category = "runner-platform-failure"
+        summary = "GitHub Actions jobs failed before any workflow steps were recorded."
+    elif runtime.get("failing_runs"):
+        category = "workflow-failure"
+        summary = "GitHub Actions has failing completed workflow runs."
+    elif runtime.get("checked") and not runtime.get("command_available"):
+        category = "ci-runtime-unavailable"
+        summary = "The gh command is unavailable, so live GitHub Actions runs were not checked."
+    elif not workflows:
+        category = "ci-workflows-missing"
+        summary = "No GitHub Actions workflow files were found."
+    elif not runtime.get("checked"):
+        category = "ci-runtime-unchecked"
+        summary = "Workflow files were parsed locally; live GitHub Actions runs were not checked."
+    else:
+        category = "ci-ok"
+        summary = "CI workflow files and checked GitHub Actions runs look healthy."
+
+    actions: list[str] = []
+    if category == "runner-platform-failure":
+        actions.extend(
+            [
+                "Open the failed job URL and verify whether GitHub reports a runner, billing, or repository Actions policy issue.",
+                "Treat local quality_gate.ps1 and docker_smoke.ps1 as the source of truth until GitHub-hosted runners execute workflow steps.",
+            ]
+        )
+    elif category == "workflow-failure":
+        actions.append("Inspect failing run logs and rerun the matching local quality gate.")
+    elif category == "ci-runtime-unavailable":
+        actions.append("Install or authenticate gh before using ctx ci status --run.")
+    elif category == "ci-workflows-missing":
+        actions.append("Add .github/workflows/*.yml or run without strict mode for repositories that intentionally skip GitHub Actions.")
+    elif category == "ci-runtime-unchecked":
+        actions.append("Run ctx ci status . --run to include recent GitHub Actions runtime results.")
+
+    return {
+        "category": category,
+        "summary": summary,
+        "recommended_actions": actions,
+        "warning_count": len(warnings),
+        "error_count": len(errors),
+    }
+
+
 def ci_status(
     path: str | Path = ".",
     provider: str = "github-actions",
@@ -250,6 +299,8 @@ def ci_status(
     elif warnings:
         status = "warn"
 
+    diagnosis = _diagnose_ci(runtime, workflows, warnings, errors)
+
     return {
         "status": status,
         "provider": provider,
@@ -257,6 +308,7 @@ def ci_status(
         "workflows": workflows,
         "workflow_count": len(workflows),
         "runtime": runtime,
+        "diagnosis": diagnosis,
         "warnings": sorted(warnings),
         "errors": sorted(errors),
     }
