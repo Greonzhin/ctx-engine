@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `ci`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `decisions`, `memory`, `install`, `client-check`, `ci`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
@@ -32,6 +32,7 @@ Implemented:
 - Import-aware test plan suggestions in context capsules
 - Project convention reports for languages, source/test roots, imports, route-like symbols, and test symbols
 - Local CI provider reports for GitHub Actions workflow inventory and optional `gh` run status
+- Local ADR/decision graph reports from docs, README, runbooks, and architecture notes
 - Built-in workflow recipes, generated-rules drift checks, local policy checks, multi-project workspace management, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
 
 Not implemented in P0:
@@ -82,6 +83,7 @@ ctx workspace use <workspace-id-or-path>
 ctx workspace check --strict
 ctx workflow suggest "fix failing auth test"
 ctx rules check . --strict
+ctx decisions report .
 ctx policy check . --strict
 ctx hooks plan all
 ctx feedback report
@@ -198,6 +200,7 @@ P1 candidates:
 - optional scanner adapters: Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
 - optional read-only structural search adapter via ast-grep
 - local CI provider for GitHub Actions workflow inventory and optional `gh run list`
+- ADR/decision graph report from local docs
 - test suggestion engine refinements
 - project convention extraction for source roots, test roots, imports, and route-like symbols
 - capsule feedback
@@ -217,6 +220,7 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - local read-only dashboard via `http://127.0.0.1:7331/dashboard`
 - read-only structural search via `ctx structural-search` when ast-grep is installed
 - CI provider status via `ctx ci status`; live GitHub run checks require explicit `--run`
+- ADR/decision graph report via `ctx decisions report`
 
 Remaining P2 candidates:
 
@@ -240,6 +244,7 @@ ctx workspace list
 ctx workspace check --strict
 ctx workflow list
 ctx rules check . --strict
+ctx decisions report .
 ctx policy check . --strict
 ctx hooks plan all
 ctx feedback report

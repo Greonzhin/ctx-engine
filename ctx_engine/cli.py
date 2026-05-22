@@ -11,6 +11,7 @@ from .ci_status import SUPPORTED_CI_PROVIDERS, ci_status
 from .client_check import check_clients
 from .client_adapters import ClaudeAdapter, CodexAdapter, GeminiAdapter, GenericAdapter
 from .config import DEFAULT_HOST, DEFAULT_PORT, SUPPORTED_MODES, ensure_project_config
+from .decisions import decision_report
 from .doctor import doctor_status
 from .hooks import SUPPORTED_HOOK_CLIENTS, hook_plan
 from .inspector_smoke import inspector_smoke
@@ -151,6 +152,16 @@ def cmd_docs(args: argparse.Namespace) -> int:
         print_json(provider.query(args.library_id, args.query))
     else:
         raise SystemExit("unknown docs command")
+    return 0
+
+
+def cmd_decisions(args: argparse.Namespace) -> int:
+    if args.decisions_command != "report":
+        raise SystemExit("unknown decisions command")
+    result = decision_report(args.path, limit=args.limit)
+    print_json(result)
+    if args.strict:
+        return 0 if result["status"] == "ok" and result["decision_count"] > 0 else 1
     return 0
 
 
@@ -566,6 +577,14 @@ def build_parser() -> argparse.ArgumentParser:
     docs_query.add_argument("library_id")
     docs_query.add_argument("query")
     docs_query.set_defaults(func=cmd_docs)
+
+    decisions = sub.add_parser("decisions")
+    decisions_sub = decisions.add_subparsers(dest="decisions_command", required=True)
+    decisions_report = decisions_sub.add_parser("report")
+    decisions_report.add_argument("path", nargs="?", default=".")
+    decisions_report.add_argument("--limit", type=int, default=50)
+    decisions_report.add_argument("--strict", action="store_true", help="Return non-zero when no decision signals are found.")
+    decisions_report.set_defaults(func=cmd_decisions)
 
     memory = sub.add_parser("memory")
     memory_sub = memory.add_subparsers(dest="memory_command", required=True)

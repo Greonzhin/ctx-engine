@@ -95,6 +95,9 @@ Write-Step "verified capsule cache"
 Write-Step "docs scan strict"
 & $projectPython -m ctx_engine.cli docs-scan --strict
 
+Write-Step "decision graph report"
+& $projectPython -m ctx_engine.cli decisions report . --limit 20
+
 Write-Step "context7 egress report"
 & $projectPython -m ctx_engine.cli egress-report --provider context7
 
