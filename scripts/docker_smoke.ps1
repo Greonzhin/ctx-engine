@@ -75,6 +75,20 @@ function Wait-Health {
   throw "ctx-engine health endpoint hazir olmadi: http://127.0.0.1:7331/health"
 }
 
+function Assert-Dashboard {
+  $response = Invoke-WebRequest -Uri "http://127.0.0.1:7331/dashboard/status" -UseBasicParsing -TimeoutSec 5
+  if ($response.StatusCode -ne 200) {
+    throw "dashboard status HTTP 200 donmedi: $($response.StatusCode)"
+  }
+  $payload = $response.Content | ConvertFrom-Json
+  if (-not $payload.local_only) {
+    throw "dashboard local_only sinyali beklenen gibi degil"
+  }
+  if ($payload.mode -ne "safe") {
+    throw "dashboard mode safe degil: $($payload.mode)"
+  }
+}
+
 function Assert-ContainerRuntime {
   $uid = (Invoke-Compose @("exec", "-T", "ctx-engine", "python", "-c", "import os; print(f'{os.getuid()}:{os.getgid()}')")).Trim()
   if ($uid -ne "10001:10001") {
@@ -126,6 +140,9 @@ try {
 
   Write-Step "MCP contract check"
   & $projectPython -m ctx_engine.cli mcp-check --endpoint "http://127.0.0.1:7331/mcp"
+
+  Write-Step "dashboard status"
+  Assert-Dashboard
 
   Write-Step "doctor"
   & $projectPython -m ctx_engine.cli doctor

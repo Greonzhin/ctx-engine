@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from . import __version__
 from .capsule.builder import CapsuleBuilder
 from .config import DEFAULT_HOST, DEFAULT_PORT, SUPPORTED_MODES
+from .dashboard import dashboard_status, render_dashboard_html
 from .doctor import doctor_status
 from .providers.action_ledger import ActionLedger
 from .providers.code_graph import CodeGraphProvider
@@ -335,13 +336,31 @@ def make_handler(mode: str) -> type[BaseHTTPRequestHandler]:
             self.end_headers()
             self.wfile.write(body)
 
+        def _write_html(self, status: int, value: str) -> None:
+            body = value.encode("utf-8")
+            self.send_response(status)
+            self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1")
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         def do_OPTIONS(self) -> None:  # noqa: N802
             self._write_json(204, None)
 
         def do_GET(self) -> None:  # noqa: N802
-            if self.path == "/health":
+            path = urlparse(self.path).path
+            if not _local_host_allowed(self.headers.get("Host")):
+                self._write_json(403, {"error": "forbidden host"})
+                return
+            if path == "/health":
                 self._write_json(200, {"status": "ok", "mode": mode, "version": __version__})
-            elif self.path == "/mcp":
+            elif path == "/dashboard":
+                self._write_html(200, render_dashboard_html())
+            elif path == "/dashboard/status":
+                host = self.headers.get("Host") or f"{DEFAULT_HOST}:{DEFAULT_PORT}"
+                self._write_json(200, dashboard_status(mode, endpoint=f"http://{host}/mcp"))
+            elif path == "/mcp":
                 self._write_json(405, {"error": "sse stream is not supported; use POST JSON-RPC on this endpoint"})
             else:
                 self._write_json(404, {"error": "not found"})

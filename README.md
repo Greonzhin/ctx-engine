@@ -25,6 +25,7 @@ Implemented:
 - Internal RTK: token estimation, ranking, skeleton/snippet budget shaping
 - Docker safe/dev/offline/audit modes
 - Docker runtime uses a non-root UID/GID and loopback-only compose port publishing
+- Local read-only dashboard at `http://127.0.0.1:7331/dashboard`
 - Codex, Claude, Gemini, and generic MCP adapter generation
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
@@ -35,7 +36,7 @@ Not implemented in P0:
 - external Hindsight service as a required dependency (optional adapter exists; default remains SQLite)
 - KuzuDB real backend as default (sqlite is default; optional backend path is additive)
 - Neo4j
-- dashboard
+- required dashboard in P0 (local P2 dashboard is available)
 - required policy engine in P0 (local P2 policy checks are available)
 - required verified semantic cache in P0 (local P2 cache verification is available)
 - shell or write tools
@@ -101,6 +102,12 @@ All clients point to:
 http://127.0.0.1:7331/mcp
 ```
 
+The local dashboard is available when the HTTP gateway is running:
+
+```text
+http://127.0.0.1:7331/dashboard
+```
+
 ## Docker
 
 Build locally:
@@ -129,6 +136,7 @@ On Windows PowerShell, run the Docker runtime smoke when Docker Desktop is avail
 ```
 
 The smoke builds the compose image, waits for `http://127.0.0.1:7331/health`, verifies the MCP endpoint from the host, checks the non-root container user, confirms `/workspace` is read-only, confirms `/data` is writable, and then runs `docker compose down` unless `-KeepRunning` is passed.
+It also verifies `http://127.0.0.1:7331/dashboard/status`.
 
 Additional local verification helpers:
 
@@ -195,10 +203,11 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - verified capsule cache reports via `ctx cache verify`; capsule cache remains local SQLite
 - local policy checks via `ctx policy check . --strict`
 - multi-project workspace manager via `ctx workspace list/use/check`
+- local read-only dashboard via `http://127.0.0.1:7331/dashboard`
 
 Remaining P2 candidates:
 
-- dashboard
+- none in the current final-pack scope; future dashboard work is iteration, not a blocking candidate
 
 These remain outside the P0 default path; optional P2 integrations must be explicitly enabled.
 

@@ -36,6 +36,36 @@ def test_http_server_starts():
         server.server_close()
 
 
+def test_dashboard_endpoints_are_local_read_only():
+    server = make_server("127.0.0.1", 0, "safe")
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        base = f"http://127.0.0.1:{server.server_port}"
+        with urllib.request.urlopen(f"{base}/dashboard", timeout=2) as response:
+            html = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "ctx-engine" in html
+        assert "/dashboard/status" in html
+
+        with urllib.request.urlopen(f"{base}/dashboard/status", timeout=2) as response:
+            data = json.loads(response.read().decode("utf-8"))
+        assert data["local_only"] is True
+        assert data["mode"] == "safe"
+        assert data["doctor"]["checks"]["mcp_health"]["reachable"] is True
+        assert data["mcp"]["registered_tool_count"] >= 1
+
+        request = urllib.request.Request(f"{base}/dashboard/status", headers={"Host": "ctx-engine.example"})
+        try:
+            urllib.request.urlopen(request, timeout=2)
+            raise AssertionError("dashboard should reject non-local Host headers")
+        except urllib.error.HTTPError as exc:
+            assert exc.code == 403
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
 def test_mcp_contract_check_passes():
     result = check_gateway_contract()
     assert result["status"] == "pass"

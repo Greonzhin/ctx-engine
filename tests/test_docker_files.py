@@ -37,6 +37,7 @@ def test_windows_docker_smoke_script_checks_runtime_contract():
     assert "param(" in script
     assert "docker compose" in script
     assert "http://127.0.0.1:7331/health" in script
+    assert "http://127.0.0.1:7331/dashboard/status" in script
     assert "mcp-check --endpoint" in script
     assert "10001:10001" in script
     assert "/workspace read-only" in script
