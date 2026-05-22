@@ -25,6 +25,11 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     assert client_check["status"] == "ok"
     assert client_check["clients"]["codex"]["adapter"]["installed"] is True
 
+    assert main(["ci", "status", str(fixture_root.parent.parent)]) == 0
+    ci = json.loads(capsys.readouterr().out)
+    assert ci["provider"] == "github-actions"
+    assert "workflow_count" in ci
+
     assert main(["mcp-check"]) == 0
     contract = json.loads(capsys.readouterr().out)
     assert contract["status"] == "pass"

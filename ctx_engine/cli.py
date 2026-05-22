@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .benchmark import benchmark_capsule
 from .capsule.builder import CapsuleBuilder
+from .ci_status import SUPPORTED_CI_PROVIDERS, ci_status
 from .client_check import check_clients
 from .client_adapters import ClaudeAdapter, CodexAdapter, GeminiAdapter, GenericAdapter
 from .config import DEFAULT_HOST, DEFAULT_PORT, SUPPORTED_MODES, ensure_project_config
@@ -362,6 +363,21 @@ def cmd_client_check(args: argparse.Namespace) -> int:
     return 1 if args.strict and result["status"] != "ok" else 0
 
 
+def cmd_ci(args: argparse.Namespace) -> int:
+    if args.ci_command != "status":
+        raise SystemExit("unknown ci command")
+    result = ci_status(
+        args.path,
+        provider=args.provider,
+        run=args.run,
+        strict=args.strict,
+        timeout=args.timeout,
+        limit=args.limit,
+    )
+    print_json(result)
+    return 1 if args.strict and result["status"] != "ok" else 0
+
+
 def cmd_security_scan(args: argparse.Namespace) -> int:
     result = scan_security(
         args.path,
@@ -698,6 +714,17 @@ def build_parser() -> argparse.ArgumentParser:
     client_check.add_argument("--timeout", type=float, default=8.0)
     client_check.add_argument("--strict", action="store_true", help="Return non-zero when attention is needed.")
     client_check.set_defaults(func=cmd_client_check)
+
+    ci = sub.add_parser("ci")
+    ci_sub = ci.add_subparsers(dest="ci_command", required=True)
+    ci_status_parser = ci_sub.add_parser("status")
+    ci_status_parser.add_argument("path", nargs="?", default=".")
+    ci_status_parser.add_argument("--provider", choices=SUPPORTED_CI_PROVIDERS, default="github-actions")
+    ci_status_parser.add_argument("--run", action="store_true", help="Use gh to read recent GitHub Actions runs when available.")
+    ci_status_parser.add_argument("--limit", type=int, default=5)
+    ci_status_parser.add_argument("--timeout", type=float, default=10.0)
+    ci_status_parser.add_argument("--strict", action="store_true", help="Return non-zero when workflows are missing, gh fails, or recent runs fail.")
+    ci_status_parser.set_defaults(func=cmd_ci)
 
     security_scan = sub.add_parser("security-scan")
     security_scan.add_argument("path", nargs="?", default=".")

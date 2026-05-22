@@ -80,6 +80,9 @@ $workspaceId = $indexPayload.code.workspace_id
 Write-Step "workspace manager check"
 & $projectPython -m ctx_engine.cli workspace check --strict
 
+Write-Step "ci provider status"
+& $projectPython -m ctx_engine.cli ci status .
+
 Write-Step "project conventions"
 & $projectPython -m ctx_engine.cli conventions . --limit 5
 

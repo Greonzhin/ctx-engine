@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `ci`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
@@ -31,6 +31,7 @@ Implemented:
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
 - Project convention reports for languages, source/test roots, imports, route-like symbols, and test symbols
+- Local CI provider reports for GitHub Actions workflow inventory and optional `gh` run status
 - Built-in workflow recipes, generated-rules drift checks, local policy checks, multi-project workspace management, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
 
 Not implemented in P0:
@@ -72,6 +73,8 @@ ctx install claude
 ctx install gemini
 ctx install status
 ctx client-check --run
+ctx ci status
+ctx ci status --run
 ctx security-scan . --all
 ctx structural-search . --pattern 'def $FUNC($$$): $$$' --lang python
 ctx workspace list
@@ -194,6 +197,7 @@ P1 candidates:
 - workflow recipes and local quality gate script
 - optional scanner adapters: Semgrep, Gitleaks, Secretlint, npm audit, and pip-audit
 - optional read-only structural search adapter via ast-grep
+- local CI provider for GitHub Actions workflow inventory and optional `gh run list`
 - test suggestion engine refinements
 - project convention extraction for source roots, test roots, imports, and route-like symbols
 - capsule feedback
@@ -212,6 +216,7 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - multi-project workspace manager via `ctx workspace list/use/check`
 - local read-only dashboard via `http://127.0.0.1:7331/dashboard`
 - read-only structural search via `ctx structural-search` when ast-grep is installed
+- CI provider status via `ctx ci status`; live GitHub run checks require explicit `--run`
 
 Remaining P2 candidates:
 
@@ -228,6 +233,7 @@ ctx doctor
 ctx doctor --strict
 ctx install status
 ctx client-check
+ctx ci status
 ctx security-scan . --all
 ctx structural-search . --pattern 'def $FUNC($$$): $$$' --lang python
 ctx workspace list
