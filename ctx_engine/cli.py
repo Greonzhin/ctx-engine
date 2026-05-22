@@ -17,6 +17,7 @@ from .log_compression import compress_log_file, compress_log_text
 from .mcp_contract import check_gateway_contract, check_http_gateway_contract
 from .mcp_lint import lint_gateway_tools
 from .pathmap import check_paths, map_path
+from .policy import evaluate_policy
 from .providers.action_ledger import ActionLedger
 from .providers.capsule_feedback import CapsuleFeedbackProvider, VALID_FEEDBACK_RATINGS
 from .providers.code_graph import CodeGraphProvider
@@ -403,6 +404,16 @@ def cmd_cache(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_policy(args: argparse.Namespace) -> int:
+    if args.policy_command != "check":
+        raise SystemExit("unknown policy command")
+    result = evaluate_policy(args.path, mode=args.mode)
+    print_json(result)
+    if args.strict:
+        return 0 if result["status"] == "pass" else 1
+    return 0
+
+
 def cmd_ledger(args: argparse.Namespace) -> int:
     ledger = ActionLedger()
     if args.ledger_command == "tail":
@@ -658,6 +669,14 @@ def build_parser() -> argparse.ArgumentParser:
     cache_verify.add_argument("--limit", type=int, default=100)
     cache_verify.add_argument("--strict", action="store_true", help="Return non-zero when stale or invalid capsule cache entries are found.")
     cache_verify.set_defaults(func=cmd_cache)
+
+    policy = sub.add_parser("policy")
+    policy_sub = policy.add_subparsers(dest="policy_command", required=True)
+    policy_check = policy_sub.add_parser("check")
+    policy_check.add_argument("path", nargs="?", default=".")
+    policy_check.add_argument("--mode", choices=sorted(SUPPORTED_MODES), default="safe")
+    policy_check.add_argument("--strict", action="store_true", help="Return non-zero when policy checks fail.")
+    policy_check.set_defaults(func=cmd_policy)
 
     ledger = sub.add_parser("ledger")
     ledger_sub = ledger.add_subparsers(dest="ledger_command", required=True)

@@ -93,6 +93,11 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     cache = json.loads(capsys.readouterr().out)
     assert cache["status"] == "ok"
 
+    assert main(["policy", "check", str(tmp_path)]) == 0
+    policy = json.loads(capsys.readouterr().out)
+    assert policy["status"] in {"pass", "fail"}
+    assert "checks" in policy
+
     assert main(["retrieval-benchmark", str(fixture_root / "python_app"), "--top-k", "3"]) == 0
     retrieval = json.loads(capsys.readouterr().out)
     assert retrieval["status"] == "ok"

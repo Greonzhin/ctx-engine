@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `capsule`, `benchmark`, `retrieval-benchmark`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `memory`, `install`, `client-check`, `security-scan`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
@@ -28,7 +28,7 @@ Implemented:
 - Codex, Claude, Gemini, and generic MCP adapter generation
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
-- Built-in workflow recipes, generated-rules drift checks, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
+- Built-in workflow recipes, generated-rules drift checks, local policy checks, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
 
 Not implemented in P0:
 
@@ -72,6 +72,7 @@ ctx client-check --run
 ctx security-scan . --all
 ctx workflow suggest "fix failing auth test"
 ctx rules check . --strict
+ctx policy check . --strict
 ctx hooks plan all
 ctx feedback report
 ctx skill-pack generate fix-failing-test --format markdown
@@ -189,11 +190,11 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - optional KuzuDB backend selected with `CTX_ENGINE_GRAPH_BACKEND=kuzu`; SQLite remains the default and fallback
 - external Hindsight adapter selected with `CTX_ENGINE_MEMORY_PROVIDER=hindsight`; SQLite remains the default and fallback
 - verified capsule cache reports via `ctx cache verify`; capsule cache remains local SQLite
+- local policy checks via `ctx policy check . --strict`
 
 Remaining P2 candidates:
 
 - dashboard
-- policy engine
 - multi-project workspace manager
 
 These remain outside the P0 default path; optional P2 integrations must be explicitly enabled.
@@ -210,6 +211,7 @@ ctx client-check
 ctx security-scan . --all
 ctx workflow list
 ctx rules check . --strict
+ctx policy check . --strict
 ctx hooks plan all
 ctx feedback report
 ctx skill-pack list

@@ -42,6 +42,9 @@ Write-Step "mcp lint strict"
 Write-Step "rules drift strict"
 & $projectPython -m ctx_engine.cli rules check . --strict
 
+Write-Step "policy check strict"
+& $projectPython -m ctx_engine.cli policy check . --strict
+
 Write-Step "workflow recipes"
 & $projectPython -m ctx_engine.cli workflow list
 
