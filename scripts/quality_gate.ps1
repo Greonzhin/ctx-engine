@@ -101,6 +101,11 @@ Write-Step "decision graph report"
 Write-Step "migration assistant plan"
 & $projectPython -m ctx_engine.cli migration plan "gateway migration" . --limit 10
 
+Write-Step "context export/import dry-run"
+$contextExport = Join-Path $testTmp "ctx-export.json"
+& $projectPython -m ctx_engine.cli context export . --output $contextExport --limit 10
+& $projectPython -m ctx_engine.cli context import $contextExport --limit 10
+
 Write-Step "context7 egress report"
 & $projectPython -m ctx_engine.cli egress-report --provider context7
 

@@ -57,6 +57,11 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     assert decisions["status"] in {"ok", "warn"}
     assert "decision_count" in decisions
 
+    assert main(["context", "export", str(fixture_root / "python_app")]) == 0
+    context = json.loads(capsys.readouterr().out)
+    assert context["status"] in {"ok", "empty"}
+    assert "version" in context
+
     assert main(["pack-summary", "authenticate request"]) == 0
     pack = json.loads(capsys.readouterr().out)
     assert pack["status"] == "ok"

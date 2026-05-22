@@ -11,6 +11,7 @@ from .ci_status import SUPPORTED_CI_PROVIDERS, ci_status
 from .client_check import check_clients
 from .client_adapters import ClaudeAdapter, CodexAdapter, GeminiAdapter, GenericAdapter
 from .config import DEFAULT_HOST, DEFAULT_PORT, SUPPORTED_MODES, ensure_project_config
+from .context_io import export_context, import_context, write_context_export
 from .decisions import decision_report
 from .doctor import doctor_status
 from .hooks import SUPPORTED_HOOK_CLIENTS, hook_plan
@@ -164,6 +165,33 @@ def cmd_decisions(args: argparse.Namespace) -> int:
     if args.strict:
         return 0 if result["status"] == "ok" and result["decision_count"] > 0 else 1
     return 0
+
+
+def cmd_context(args: argparse.Namespace) -> int:
+    if args.context_command == "export":
+        result = export_context(
+            args.path,
+            workspace_id=args.workspace_id,
+            include_memories=not args.no_memories,
+            include_ledger=args.include_ledger,
+            limit=args.limit,
+        )
+        if args.output:
+            print_json(write_context_export(result, args.output))
+        else:
+            print_json(result)
+        return 0 if result["status"] in {"ok", "empty"} else 1
+    if args.context_command == "import":
+        result = import_context(
+            args.input,
+            workspace_id=args.workspace_id,
+            apply=args.apply,
+            agent_namespace=args.agent_namespace,
+            limit=args.limit,
+        )
+        print_json(result)
+        return 0
+    raise SystemExit("unknown context command")
 
 
 def cmd_memory(args: argparse.Namespace) -> int:
@@ -596,6 +624,24 @@ def build_parser() -> argparse.ArgumentParser:
     decisions_report.add_argument("--limit", type=int, default=50)
     decisions_report.add_argument("--strict", action="store_true", help="Return non-zero when no decision signals are found.")
     decisions_report.set_defaults(func=cmd_decisions)
+
+    context = sub.add_parser("context")
+    context_sub = context.add_subparsers(dest="context_command", required=True)
+    context_export = context_sub.add_parser("export")
+    context_export.add_argument("path", nargs="?", default=".")
+    context_export.add_argument("--workspace-id")
+    context_export.add_argument("--output")
+    context_export.add_argument("--limit", type=int, default=50)
+    context_export.add_argument("--no-memories", action="store_true")
+    context_export.add_argument("--include-ledger", action="store_true")
+    context_export.set_defaults(func=cmd_context)
+    context_import = context_sub.add_parser("import")
+    context_import.add_argument("input")
+    context_import.add_argument("--workspace-id")
+    context_import.add_argument("--agent-namespace", default="imported")
+    context_import.add_argument("--limit", type=int, default=100)
+    context_import.add_argument("--apply", action="store_true", help="Write imported memories. Default is dry-run.")
+    context_import.set_defaults(func=cmd_context)
 
     memory = sub.add_parser("memory")
     memory_sub = memory.add_subparsers(dest="memory_command", required=True)
