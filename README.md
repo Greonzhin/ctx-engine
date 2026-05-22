@@ -12,7 +12,7 @@ Implemented:
 
 - HTTP MCP gateway at `http://127.0.0.1:7331/mcp`
 - MCP protocol `2025-11-25` reporting with compatibility for older protocol headers
-- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `decisions`, `context`, `memory`, `migration`, `install`, `client-check`, `ci`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
+- CLI: `init`, `index`, `status`, `workspace`, `capsule`, `benchmark`, `retrieval-benchmark`, `conventions`, `pack-summary`, `blast-radius`, `semantic-refs`, `semantic-impact`, `docs`, `docs-scan`, `decisions`, `context`, `identity`, `memory`, `migration`, `install`, `client-check`, `ci`, `security-scan`, `structural-search`, `workflow`, `rules`, `policy`, `hooks`, `feedback`, `skill-pack`, `cache`, `compress-log`, `doctor`, `egress-report`, `path`, `mcp`, `mcp-check`, `mcp-lint`, `inspector-smoke`, `serve`, `ledger`
 - SQLite + FTS5 store for files, symbols, docs, memory, cache, and ledger
 - Python / JavaScript / TypeScript indexing with Tree-sitter availability checks and safe AST/regex fallback
 - Code/docs index hashes included in capsule cache keys with `ctx cache verify` evidence reports
@@ -35,6 +35,7 @@ Implemented:
 - Local ADR/decision graph reports from docs, README, runbooks, and architecture notes
 - Local migration plans combining code graph, docs, decisions, conventions, and test signals
 - Local context export/import manifests for workspace metadata, decisions, memory, and optional ledger entries
+- Local advisory agent identity and capability token registry
 - Built-in workflow recipes, generated-rules drift checks, local policy checks, multi-project workspace management, safe hook advisory plans, capsule feedback, advisory skill pack generation, and deterministic log compression
 
 Not implemented in P0:
@@ -75,6 +76,8 @@ ctx install codex
 ctx install claude
 ctx install gemini
 ctx install status
+ctx identity issue codex-local --client-id codex --capability read_context
+ctx identity list
 ctx client-check --run
 ctx ci status
 ctx ci status --run
@@ -208,6 +211,7 @@ P1 candidates:
 - ADR/decision graph report from local docs
 - migration assistant plans that combine docs, code graph, decisions, conventions, and tests
 - context export/import manifests for local handoff and memory restore
+- advisory agent identity and capability token registry
 - test suggestion engine refinements
 - project convention extraction for source roots, test roots, imports, and route-like symbols
 - capsule feedback
@@ -230,6 +234,7 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - ADR/decision graph report via `ctx decisions report`
 - migration assistant via `ctx migration plan`
 - context export/import via `ctx context export` and dry-run `ctx context import`
+- advisory capability tokens via `ctx identity issue/list/verify/revoke`
 
 Remaining P2 candidates:
 
@@ -245,6 +250,7 @@ scripts/smoke.sh
 ctx doctor
 ctx doctor --strict
 ctx install status
+ctx identity list
 ctx client-check
 ctx ci status
 ctx security-scan . --all

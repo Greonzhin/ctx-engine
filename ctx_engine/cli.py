@@ -15,6 +15,7 @@ from .context_io import export_context, import_context, write_context_export
 from .decisions import decision_report
 from .doctor import doctor_status
 from .hooks import SUPPORTED_HOOK_CLIENTS, hook_plan
+from .identity import ALLOWED_CAPABILITIES, issue_capability_token, list_capability_tokens, revoke_capability_token, verify_capability_token
 from .inspector_smoke import inspector_smoke
 from .log_compression import compress_log_file, compress_log_text
 from .migration_assistant import migration_plan
@@ -265,6 +266,33 @@ def cmd_install(args: argparse.Namespace) -> int:
     ActionLedger().record("install", f"installed {args.client} adapter", result.__dict__, client_id="cli")
     print_json(result.__dict__)
     return 0
+
+
+def cmd_identity(args: argparse.Namespace) -> int:
+    if args.identity_command == "issue":
+        print_json(
+            issue_capability_token(
+                args.agent_id,
+                client_id=args.client_id,
+                capabilities=args.capability,
+                ttl_minutes=args.ttl_minutes,
+                workspace_id=args.workspace_id,
+                note=args.note or "",
+            )
+        )
+        return 0
+    if args.identity_command == "list":
+        print_json(list_capability_tokens(include_revoked=args.include_revoked, limit=args.limit))
+        return 0
+    if args.identity_command == "verify":
+        result = verify_capability_token(args.token, capability=args.capability)
+        print_json(result)
+        return 0 if result["valid"] else 1
+    if args.identity_command == "revoke":
+        result = revoke_capability_token(args.token_id)
+        print_json(result)
+        return 0 if result["status"] == "ok" else 1
+    raise SystemExit("unknown identity command")
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
@@ -683,6 +711,28 @@ def build_parser() -> argparse.ArgumentParser:
     install.add_argument("path", nargs="?", default=".")
     install.add_argument("--adapter", choices=["codex", "claude", "gemini", "generic"])
     install.set_defaults(func=cmd_install)
+
+    identity = sub.add_parser("identity")
+    identity_sub = identity.add_subparsers(dest="identity_command", required=True)
+    identity_issue = identity_sub.add_parser("issue")
+    identity_issue.add_argument("agent_id")
+    identity_issue.add_argument("--client-id", default="generic")
+    identity_issue.add_argument("--workspace-id")
+    identity_issue.add_argument("--capability", choices=ALLOWED_CAPABILITIES, action="append")
+    identity_issue.add_argument("--ttl-minutes", type=int, default=60)
+    identity_issue.add_argument("--note", default="")
+    identity_issue.set_defaults(func=cmd_identity)
+    identity_list = identity_sub.add_parser("list")
+    identity_list.add_argument("--include-revoked", action="store_true")
+    identity_list.add_argument("--limit", type=int, default=50)
+    identity_list.set_defaults(func=cmd_identity)
+    identity_verify = identity_sub.add_parser("verify")
+    identity_verify.add_argument("token")
+    identity_verify.add_argument("--capability", choices=ALLOWED_CAPABILITIES)
+    identity_verify.set_defaults(func=cmd_identity)
+    identity_revoke = identity_sub.add_parser("revoke")
+    identity_revoke.add_argument("token_id")
+    identity_revoke.set_defaults(func=cmd_identity)
 
     doctor = sub.add_parser("doctor")
     doctor.add_argument("path", nargs="?", default=".")

@@ -20,6 +20,11 @@ def test_cli_init_index_and_install(tmp_path, fixture_root, monkeypatch, capsys)
     assert status["all_installed"] is True
     assert status["clients"]["codex"]["endpoint_matches_rules"] is True
 
+    assert main(["identity", "list"]) == 0
+    identity = json.loads(capsys.readouterr().out)
+    assert identity["status"] == "ok"
+    assert "tokens" in identity
+
     assert main(["client-check", str(tmp_path), "--adapter", "codex"]) == 0
     client_check = json.loads(capsys.readouterr().out)
     assert client_check["status"] == "ok"

@@ -51,6 +51,9 @@ Write-Step "workflow recipes"
 Write-Step "hook advisory plan"
 & $projectPython -m ctx_engine.cli hooks plan all
 
+Write-Step "identity capability registry"
+& $projectPython -m ctx_engine.cli identity list
+
 Write-Step "capsule feedback report"
 & $projectPython -m ctx_engine.cli feedback report --limit 5
 
