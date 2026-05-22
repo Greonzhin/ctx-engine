@@ -47,6 +47,8 @@ def test_dashboard_endpoints_are_local_read_only():
         assert response.status == 200
         assert "ctx-engine" in html
         assert "/dashboard/status" in html
+        assert "Operations" in html
+        assert "Identity" in html
 
         with urllib.request.urlopen(f"{base}/dashboard/status", timeout=2) as response:
             data = json.loads(response.read().decode("utf-8"))
@@ -54,6 +56,11 @@ def test_dashboard_endpoints_are_local_read_only():
         assert data["mode"] == "safe"
         assert data["doctor"]["checks"]["mcp_health"]["reachable"] is True
         assert data["mcp"]["registered_tool_count"] >= 1
+        assert data["operations"]["ci"]["workflow_count"] >= 1
+        assert "decision_count" in data["operations"]["decisions"]
+        assert "active_tokens" in data["operations"]["identity"]
+        assert "read_context" in data["operations"]["identity"]["allowed_capabilities"]
+        assert data["operations"]["context_export"]["status"] in {"ok", "empty"}
 
         request = urllib.request.Request(f"{base}/dashboard/status", headers={"Host": "ctx-engine.example"})
         try:

@@ -5,7 +5,11 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
+from .ci_status import ci_status
+from .context_io import export_context
+from .decisions import decision_report
 from .doctor import doctor_status
+from .identity import ALLOWED_CAPABILITIES, list_capability_tokens
 from .mcp_registry import load_tool_registry
 from .providers.action_ledger import ActionLedger
 from .providers.egress import EgressProvider
@@ -45,6 +49,46 @@ def dashboard_status(mode: str = "safe", endpoint: str | None = None) -> dict[st
     cache = verify_capsule_cache(limit=10)
     egress = EgressProvider().report(provider="context7", limit=20)
     ledger = ActionLedger().tail(limit=5)
+    ci = ci_status(root, run=False) if Path(root).exists() else {"status": "warn", "workflow_count": 0, "warnings": ["workspace root is unavailable"]}
+    decisions = decision_report(root, limit=20) if Path(root).exists() else {"status": "warn", "decision_count": 0, "warnings": ["workspace root is unavailable"]}
+    context = export_context(root, include_memories=True, include_ledger=False, limit=20)
+    identity = list_capability_tokens(include_revoked=False, limit=20)
+    operations = {
+        "status": _rollup(
+            [
+                str(ci.get("status", "warn")),
+                str(decisions.get("status", "warn")),
+                str(context.get("status", "empty")),
+                str(identity.get("status", "warn")),
+            ]
+        ),
+        "ci": {
+            "status": ci.get("status"),
+            "provider": ci.get("provider"),
+            "workflow_count": ci.get("workflow_count", 0),
+            "warnings": ci.get("warnings", []),
+        },
+        "decisions": {
+            "status": decisions.get("status"),
+            "decision_count": decisions.get("decision_count", 0),
+            "documents_scanned": decisions.get("documents_scanned", 0),
+            "summary": decisions.get("summary", {}),
+            "warnings": decisions.get("warnings", []),
+        },
+        "context_export": {
+            "status": context.get("status"),
+            "version": context.get("version"),
+            "workspace_id": (context.get("workspace") or {}).get("id") if isinstance(context.get("workspace"), dict) else None,
+            "memory_summary": context.get("memory_summary", {}),
+            "decision_summary": context.get("decision_summary", {}),
+            "warnings": context.get("warnings", []),
+        },
+        "identity": {
+            "status": identity.get("status"),
+            "active_tokens": identity.get("count", 0),
+            "allowed_capabilities": list(ALLOWED_CAPABILITIES),
+        },
+    }
 
     status = _rollup(
         [
@@ -52,6 +96,7 @@ def dashboard_status(mode: str = "safe", endpoint: str | None = None) -> dict[st
             str(doctor.get("status", "unhealthy")),
             str(policy.get("status", "fail")),
             str(cache.get("status", "ok")),
+            str(operations.get("status", "attention")),
         ]
     )
     return {
@@ -71,6 +116,7 @@ def dashboard_status(mode: str = "safe", endpoint: str | None = None) -> dict[st
             "errors": [],
         },
         "cache": cache,
+        "operations": operations,
         "egress": egress,
         "ledger": ledger,
     }
@@ -209,6 +255,18 @@ def render_dashboard_html() -> str:
         <div class="metric"><span class="label">Context7 events</span><span class="value" id="egressEvents">-</span></div>
         <div class="metric"><span class="label">Context7 failures</span><span class="value" id="egressFailures">-</span></div>
       </div>
+      <div class="panel">
+        <h2>Operations</h2>
+        <div class="metric"><span class="label">Status</span><span class="value" id="operationsStatus">-</span></div>
+        <div class="metric"><span class="label">CI workflows</span><span class="value" id="ciWorkflows">-</span></div>
+        <div class="metric"><span class="label">Decisions</span><span class="value" id="decisionCount">-</span></div>
+      </div>
+      <div class="panel">
+        <h2>Identity</h2>
+        <div class="metric"><span class="label">Active tokens</span><span class="value" id="identityTokens">-</span></div>
+        <div class="metric"><span class="label">Capabilities</span><span class="value" id="identityCapabilities">-</span></div>
+        <div class="metric"><span class="label">Context export</span><span class="value" id="contextExportStatus">-</span></div>
+      </div>
       <div class="panel wide">
         <h2>Workspaces</h2>
         <table>
@@ -244,6 +302,12 @@ def render_dashboard_html() -> str:
         text("cacheStatus", data.cache?.status);
         text("egressEvents", data.egress?.summary?.events);
         text("egressFailures", data.egress?.summary?.failed);
+        text("operationsStatus", data.operations?.status);
+        text("ciWorkflows", data.operations?.ci?.workflow_count);
+        text("decisionCount", data.operations?.decisions?.decision_count);
+        text("identityTokens", data.operations?.identity?.active_tokens);
+        text("identityCapabilities", (data.operations?.identity?.allowed_capabilities || []).length);
+        text("contextExportStatus", data.operations?.context_export?.status);
         const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({{
           "&": "&amp;", "<": "&lt;", ">": "&gt;", "\\"": "&quot;", "'": "&#39;"
         }}[char]));

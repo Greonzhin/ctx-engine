@@ -26,7 +26,7 @@ Implemented:
 - Internal RTK: token estimation, ranking, skeleton/snippet budget shaping
 - Docker safe/dev/offline/audit modes
 - Docker runtime uses a non-root UID/GID and loopback-only compose port publishing
-- Local read-only dashboard at `http://127.0.0.1:7331/dashboard`
+- Local read-only dashboard at `http://127.0.0.1:7331/dashboard` with runtime, policy, MCP, cache, egress, CI, decisions, context export, and identity summaries
 - Codex, Claude, Gemini, and generic MCP adapter generation
 - Windows / WSL2 / Docker path mapping checks
 - Import-aware test plan suggestions in context capsules
@@ -125,6 +125,8 @@ The local dashboard is available when the HTTP gateway is running:
 ```text
 http://127.0.0.1:7331/dashboard
 ```
+
+The JSON status endpoint at `/dashboard/status` is local-only and includes read-only summaries for doctor checks, policy, MCP registry, cache verification, Context7 egress, workspace inventory, GitHub Actions workflow inventory, decision graph counts, context export readiness, and advisory identity tokens.
 
 ## Docker
 
@@ -228,7 +230,7 @@ P2 optional paths now present behind explicit opt-in or local verification:
 - verified capsule cache reports via `ctx cache verify`; capsule cache remains local SQLite
 - local policy checks via `ctx policy check . --strict`
 - multi-project workspace manager via `ctx workspace list/use/check`
-- local read-only dashboard via `http://127.0.0.1:7331/dashboard`
+- local read-only dashboard via `http://127.0.0.1:7331/dashboard`, including P2 operations and identity summaries
 - read-only structural search via `ctx structural-search` when ast-grep is installed
 - CI provider status via `ctx ci status`; live GitHub run checks require explicit `--run`
 - ADR/decision graph report via `ctx decisions report`
