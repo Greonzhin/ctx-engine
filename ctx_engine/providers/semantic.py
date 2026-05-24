@@ -19,6 +19,14 @@ def _symbol_token(value: str) -> str:
 def _term_in_text(term: str, text: str) -> bool:
     if not term or not text:
         return False
+
+    # Fast path: substring check avoids expensive regex calls for the common
+    # negative case, while preserving regex word-boundary semantics for positives.
+    lowered_term = term.lower()
+    lowered_text = text.lower()
+    if lowered_term not in lowered_text:
+        return False
+
     pattern = rf"\b{re.escape(term)}\b"
     return re.search(pattern, text, re.IGNORECASE) is not None
 
