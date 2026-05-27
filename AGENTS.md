@@ -18,15 +18,6 @@ Privacy:
 - Context7 is public documentation only.
 - Secrets and ignored files must not appear in capsules, cache, or ledger.
 
-Jules guidance:
-
-- Jules reads this AGENTS.md file automatically when working on the repository.
-- Jules tasks run in a short-lived Ubuntu VM; use `.jules/setup.sh` as the setup reference instead of Windows PowerShell scripts.
-- Keep setup commands short and finite. Do not use long-running dev servers or watch commands in Jules setup.
-- For Bolt performance tasks, read `.jules/bolt.md` before starting, profile first, select one measurable optimization under 50 changed lines, and stop if no clear performance win exists.
-- This is a Python project; use `python -m pip install -e ".[dev]"` and `python -m pytest -q` instead of pnpm commands unless the task explicitly targets a JavaScript fixture.
-- Do not modify `pyproject.toml`, Docker runtime files, generated client files, or MCP tool surface for a Bolt task unless explicitly approved.
-
 Hook guidance:
 
 - Advisory only: ctx-engine does not auto-install executable hooks.
