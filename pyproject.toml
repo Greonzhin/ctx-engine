@@ -14,6 +14,12 @@ dependencies = [
   "tree-sitter-language-pack>=1.8.1",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Greonzhin/ctx-engine"
+Repository = "https://github.com/Greonzhin/ctx-engine.git"
+Issues = "https://github.com/Greonzhin/ctx-engine/issues"
+
+
 [project.optional-dependencies]
 dev = [
   "pytest>=9.0.0",

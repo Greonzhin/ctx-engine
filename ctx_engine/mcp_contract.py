@@ -45,7 +45,7 @@ def check_gateway_contract(mode: str = "safe") -> dict[str, Any]:
     return result
 
 
-def check_http_gateway_contract(endpoint: str = DEFAULT_ENDPOINT, timeout: float = 2.0) -> dict[str, Any]:
+def check_http_gateway_contract(endpoint: str = DEFAULT_ENDPOINT, timeout: float = 5.0) -> dict[str, Any]:
     def call(payload: dict[str, Any]) -> tuple[int, dict[str, Any] | None]:
         body = json.dumps(payload).encode("utf-8")
         request = urllib.request.Request(

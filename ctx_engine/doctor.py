@@ -23,8 +23,9 @@ def _port_free(host: str, port: int) -> bool:
 def _http_health(endpoint: str) -> dict[str, object]:
     base = endpoint.rsplit("/mcp", 1)[0]
     try:
-        with urllib.request.urlopen(f"{base}/health", timeout=0.5) as response:
+        with urllib.request.urlopen(f"{base}/health", timeout=3.0) as response:
             return {"reachable": True, "status": response.status}
+
     except urllib.error.URLError as exc:
         return {"reachable": False, "warning": type(exc.reason).__name__ if hasattr(exc, "reason") else str(exc)}
     except Exception as exc:

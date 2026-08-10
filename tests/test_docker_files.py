@@ -50,6 +50,7 @@ def test_client_and_external_runtime_smoke_scripts_exist():
     external = (root / "scripts" / "external_runtime_smoke.ps1").read_text(encoding="utf-8")
     quality = (root / "scripts" / "quality_gate.ps1").read_text(encoding="utf-8")
     private_beta = (root / "scripts" / "private_beta_gate.ps1").read_text(encoding="utf-8")
+    public_release = (root / "scripts" / "public_release_gate.ps1").read_text(encoding="utf-8")
 
     assert "client-check" in client
     assert "adapter config status" in client
@@ -77,3 +78,9 @@ def test_client_and_external_runtime_smoke_scripts_exist():
     assert "GitHub Actions zero-step failure" in private_beta
     assert "git status --short --branch" in private_beta
     assert "Release note fields" in private_beta
+    assert "https://github.com/Greonzhin/ctx-engine" in public_release
+    assert "LICENSE" in public_release
+    assert "quality_gate.ps1" in public_release
+    assert "client_smoke.ps1" in public_release
+    assert "Public open-source release ready!" in public_release
+

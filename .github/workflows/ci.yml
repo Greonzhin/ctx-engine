@@ -2,22 +2,31 @@ name: ci
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+permissions:
+  contents: read
 
 jobs:
   test:
-    name: python-quality-gate
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v6
+    name: python-quality-gate (${{ matrix.os }}, python-${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
 
-      - uses: actions/setup-python@v6
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
       - name: Install dev package
         shell: pwsh
@@ -39,11 +48,12 @@ jobs:
     name: docker-runtime-smoke
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
 
       - name: Install dev package
         shell: pwsh

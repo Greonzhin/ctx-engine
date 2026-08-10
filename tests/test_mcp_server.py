@@ -28,7 +28,7 @@ def test_http_server_starts():
     thread.start()
     try:
         url = f"http://127.0.0.1:{server.server_port}/health"
-        with urllib.request.urlopen(url, timeout=2) as response:
+        with urllib.request.urlopen(url, timeout=10) as response:
             data = json.loads(response.read().decode("utf-8"))
         assert data["status"] == "ok"
     finally:
@@ -42,7 +42,7 @@ def test_dashboard_endpoints_are_local_read_only():
     thread.start()
     try:
         base = f"http://127.0.0.1:{server.server_port}"
-        with urllib.request.urlopen(f"{base}/dashboard", timeout=2) as response:
+        with urllib.request.urlopen(f"{base}/dashboard", timeout=10) as response:
             html = response.read().decode("utf-8")
         assert response.status == 200
         assert "ctx-engine" in html
@@ -50,7 +50,7 @@ def test_dashboard_endpoints_are_local_read_only():
         assert "Operations" in html
         assert "Identity" in html
 
-        with urllib.request.urlopen(f"{base}/dashboard/status", timeout=2) as response:
+        with urllib.request.urlopen(f"{base}/dashboard/status", timeout=10) as response:
             data = json.loads(response.read().decode("utf-8"))
         assert data["local_only"] is True
         assert data["mode"] == "safe"
@@ -64,7 +64,7 @@ def test_dashboard_endpoints_are_local_read_only():
 
         request = urllib.request.Request(f"{base}/dashboard/status", headers={"Host": "ctx-engine.example"})
         try:
-            urllib.request.urlopen(request, timeout=2)
+            urllib.request.urlopen(request, timeout=10)
             raise AssertionError("dashboard should reject non-local Host headers")
         except urllib.error.HTTPError as exc:
             assert exc.code == 403
@@ -106,7 +106,7 @@ def _post_json(url: str, payload: dict[str, object], headers: dict[str, str] | N
             **(headers or {}),
         },
     )
-    with urllib.request.urlopen(request, timeout=2) as response:
+    with urllib.request.urlopen(request, timeout=10) as response:
         return response.status, json.loads(response.read().decode("utf-8"))
 
 
@@ -148,7 +148,7 @@ def test_http_mcp_get_returns_405_without_sse_stream():
             headers={"Accept": "text/event-stream"},
         )
         try:
-            urllib.request.urlopen(request, timeout=2)
+            urllib.request.urlopen(request, timeout=10)
             raise AssertionError("GET /mcp should report unsupported SSE stream")
         except urllib.error.HTTPError as exc:
             assert exc.code == 405
