@@ -22,4 +22,6 @@ build/
 *.db
 *.dump
 
-.claude/tdd-guard/data/
+.claude/
+.jules/
+

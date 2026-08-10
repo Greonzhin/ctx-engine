@@ -1,3 +1,0 @@
-## 2024-05-24 - Fast-path Substring Optimization
-**Learning:** In text/symbol search (like `_term_in_text`), running a full regular expression match (`re.search` with `re.IGNORECASE`) for every document line or symbol name is extremely slow when most matches are negative.
-**Action:** Always wrap expensive, repetitive regular expressions in a fast-path substring check (e.g. `term.lower() not in text.lower()`). The simple substring check fails fast and avoids constructing and evaluating the regex engine, dramatically reducing search hot-path time while preserving boundary semantics for positive matches.
