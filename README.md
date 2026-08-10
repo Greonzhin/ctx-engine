@@ -125,18 +125,6 @@ On Windows PowerShell, run the Docker smoke verification script:
 
 ---
 
-## Roadmap & Research
-
-See the following research documents for comparison against adjacent MCP gateways, dependency scans, gap analyses, and priorities:
-
-- [Other Repositories And Adoptable Ideas](docs/research/other-repos-and-adoptables.md)
-- [Context7 Project Scan](docs/research/context7-project-scan.md)
-- [Expanded Sources And Untested Follow-Up](docs/research/expanded-sources-and-untested-followup.md)
-- [Current Gap Analysis](docs/research/current-gap-analysis-2026-05-16.md)
-- [Memory And Graph Repo Scan](docs/research/memory-and-graph-repo-scan-2026-05-19.md)
-
----
-
 ## Verification & Release Gates
 
 Run local quality and release validation gates:
@@ -157,8 +145,7 @@ pytest
 ## Documentation & Runbooks
 
 - [Public Open-Source Release Runbook](docs/runbooks/public-release.md)
-- [Private Beta Runbook](docs/runbooks/private-beta.md)
-- [Gap Analysis & Roadmap](docs/research/current-gap-analysis-2026-05-16.md)
+
 
 ---
 
