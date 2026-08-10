@@ -979,3 +979,16 @@ def test_graph_store_kuzu_runtime_path_uses_kuzu_backend(fixture_root, monkeypat
     assert payload["status"] == "ok"
     assert payload["backend"] == "kuzu"
     assert payload["references"]
+
+def test_term_in_text():
+    from ctx_engine.providers.semantic import _term_in_text
+
+    # Negative match
+    assert _term_in_text("auth", "this sentence has nothing") is False
+
+    # Positive case-insensitive match
+    assert _term_in_text("AUTH", "this sentence handles auth correctly") is True
+    assert _term_in_text("auth", "this sentence handles AUTH correctly") is True
+
+    # Substring without word boundary should return False
+    assert _term_in_text("auth", "authenticate") is False
