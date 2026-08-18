@@ -1,0 +1,96 @@
+name: Security scans
+
+# Kurulum 2026-08-18. PUBLIC repo: code scanning ücretsiz, SARIF doğrudan Security sekmesine gider.
+# Varsayılan dal: main
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 0"   # Pazar 09:00 TR
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Gitleaks (sır taraması)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read   # v3 PR taramasında pulls/<n>/commits çağırır
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3
+        env:
+          GITLEAKS_LICENSE: ""
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # v3'te PR taraması için ZORUNLU
+
+  semgrep:
+    name: Semgrep CE (security-audit)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    container:
+      image: semgrep/semgrep@sha256:67319956da3dcb58baf5b322899c15458e3963e7018a86aeeb5cd224e69cb77a # v1.173.0
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - run: semgrep scan --config p/security-audit --error
+
+  trivy-fs:
+    name: Trivy bağımlılık CVE (CRITICAL kapı)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          severity: "CRITICAL"
+          exit-code: "1"
+          ignore-unfixed: true
+      - name: HIGH (bilgi amaçlı)
+        if: always()
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          severity: "HIGH"
+          exit-code: "0"
+          ignore-unfixed: true
+
+  codeql:
+    name: CodeQL SAST
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # PUBLIC repo → code scanning ÜCRETSİZ, SARIF Security sekmesine yüklenir
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4
+        with:
+          languages: ${{ matrix.language }}
+      # upload varsayılan (always): özel repolardaki `upload: never` + artifact
+      # geçici çözümü BURADA GEREKMİYOR — bulgular doğrudan Security sekmesinde.
+      - uses: github/codeql-action/analyze@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4
+        with:
+          category: "/language:${{ matrix.language }}"
