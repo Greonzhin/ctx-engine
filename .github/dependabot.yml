@@ -1,0 +1,39 @@
+# Dependabot — SÜRÜM güncellemesi (güvenlik ALARMI ayrı, repo ayarlarından açık).
+# Haftalık + gruplu + limit 3: hesapta biriken bayat PR sorununu tekrar üretme.
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+      py:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "build(docker)"
+    groups:
+      img:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci(deps)"
+    groups:
+      actions:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+
+# tests/fixtures altındaki manifestler KASITLI dışarıda: onlar test verisi, gerçek bağımlılık değil.
