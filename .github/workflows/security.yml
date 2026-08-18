@@ -4,13 +4,22 @@ name: Security scans
 # Varsayılan dal: main
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   schedule:
     - cron: "0 6 * * 0"   # Pazar 09:00 TR
   workflow_dispatch:
+
+# ⚠️ 2026-08-18: hesabın Actions harcama limiti doldu (7 repoya aynı anda tarama
+# eklenince Dependabot her PR'da tam taramayı tetikledi). Yük üç yerden düşürüldü:
+#   1. `push` tetikleyicisi KALDIRILDI — PR + haftalık zamanlama zaten kapsıyor
+#   2. `concurrency` + cancel-in-progress — üst üste binen koşumlar iptal
+#   3. CodeQL Dependabot PR'larında ATLANIYOR — sürüm bumpı kaynak kodu değiştirmez,
+#      bağımlılık tarafını Trivy + Dependabot alarmı zaten kapsıyor
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -73,6 +82,8 @@ jobs:
 
   codeql:
     name: CodeQL SAST
+    # Dependabot PR'ı kaynak kodu değiştirmez; en pahalı iş boşuna koşmasın.
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
