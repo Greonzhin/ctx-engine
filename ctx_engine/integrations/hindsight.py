@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import json
 from urllib import error, request
+from ..security.net import urlopen_checked
 
 
 class ExternalHindsightUnavailable(RuntimeError):
@@ -45,7 +46,7 @@ class HindsightAdapter:
             method="POST",
         )
         try:
-            with request.urlopen(req, timeout=self.timeout_seconds) as resp:
+            with urlopen_checked(req, timeout=self.timeout_seconds) as resp:
                 code = int(getattr(resp, "status", 200))
                 raw = resp.read().decode("utf-8", errors="replace")
         except (error.URLError, TimeoutError, OSError) as exc:

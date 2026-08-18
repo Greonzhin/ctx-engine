@@ -6,6 +6,7 @@ import urllib.request
 
 from .config import DEFAULT_ENDPOINT, SUPPORTED_MODES
 from .server import MCPGateway, PROTOCOL_VERSION
+from .security.net import urlopen_checked
 
 REQUIRED_TOOLS = {
     "workspace_register",
@@ -59,7 +60,7 @@ def check_http_gateway_contract(endpoint: str = DEFAULT_ENDPOINT, timeout: float
                 "X-Client-Id": "mcp-check",
             },
         )
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        with urlopen_checked(request, timeout=timeout) as response:
             raw = response.read().decode("utf-8")
             return response.status, json.loads(raw) if raw else None
 
