@@ -5,6 +5,7 @@ import time
 import urllib.request
 from typing import Any
 from urllib.parse import urlparse
+from ..security.net import urlopen_checked
 
 CONTEXT7_MCP_URL = "https://mcp.context7.com/mcp"
 
@@ -63,7 +64,7 @@ class Context7Client:
                 "MCP-Protocol-Version": "2025-06-18",
             },
         )
-        with urllib.request.urlopen(request, timeout=self.timeout) as response:
+        with urlopen_checked(request, timeout=self.timeout) as response:
             raw = response.read().decode("utf-8", errors="replace")
         return parse_mcp_response(raw), len(raw.encode("utf-8", errors="replace"))
 
