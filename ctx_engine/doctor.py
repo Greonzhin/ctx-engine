@@ -12,6 +12,7 @@ from .config import DEFAULT_ENDPOINT, data_dir
 from .db import sqlite_status
 from .pathmap import check_paths
 from .providers.egress import EgressProvider
+from .security.net import urlopen_checked
 
 
 def _port_free(host: str, port: int) -> bool:
@@ -23,7 +24,7 @@ def _port_free(host: str, port: int) -> bool:
 def _http_health(endpoint: str) -> dict[str, object]:
     base = endpoint.rsplit("/mcp", 1)[0]
     try:
-        with urllib.request.urlopen(f"{base}/health", timeout=3.0) as response:
+        with urlopen_checked(f"{base}/health", timeout=3.0) as response:
             return {"reachable": True, "status": response.status}
 
     except urllib.error.URLError as exc:
