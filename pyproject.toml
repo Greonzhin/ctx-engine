@@ -22,7 +22,7 @@ Issues = "https://github.com/Greonzhin/ctx-engine/issues"
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=9.0.0",
+  "pytest>=9.1.1",
 ]
 
 [project.scripts]
