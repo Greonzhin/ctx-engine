@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "ctx-engine contributors" }]
 dependencies = [
-  "tree-sitter-language-pack>=1.8.1",
+  "tree-sitter-language-pack>=1.14.3",
 ]
 
 [project.urls]
