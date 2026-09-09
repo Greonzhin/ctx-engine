@@ -13,7 +13,9 @@ permissions:
 jobs:
   test:
     name: python-quality-gate (${{ matrix.os }}, python-${{ matrix.python-version }})
-    runs-on: ${{ matrix.os }}
+    # ubuntu ayagini self-hosted'a cevirir; matrix DEGERI degismedigi icin is
+    # adi (`test (ubuntu-latest, 3.x)`) ve zorunlu kontrol eslesmesi korunur.
+    runs-on: ${{ matrix.os == 'ubuntu-latest' && 'self-hosted' || matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -46,7 +48,11 @@ jobs:
 
   docker:
     name: docker-runtime-smoke
-    runs-on: ubuntu-latest
+    # 2026-09-09: GitHub Actions kotasi doldu (isler adim=0 / ~2 sn / logsuz
+    # duser). GREON'daki self-hosted runner'a alindi. GERI DONUS: bu satiri
+    # `runs-on: ubuntu-latest` yap; kontrol ADI degismedigi icin zorunlu
+    # kontrol listesine dokunmak gerekmez.
+    runs-on: [self-hosted, linux]
     steps:
       - uses: actions/checkout@v4
 

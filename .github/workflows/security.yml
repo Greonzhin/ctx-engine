@@ -27,7 +27,11 @@ permissions:
 jobs:
   gitleaks:
     name: Gitleaks (sır taraması)
-    runs-on: ubuntu-latest
+    # 2026-09-09: GitHub Actions kotasi doldu (isler adim=0 / ~2 sn / logsuz
+    # duser). GREON'daki self-hosted runner'a alindi. GERI DONUS: bu satiri
+    # `runs-on: ubuntu-latest` yap; kontrol ADI degismedigi icin zorunlu
+    # kontrol listesine dokunmak gerekmez.
+    runs-on: [self-hosted, linux]
     permissions:
       contents: read
       pull-requests: read   # v3 PR taramasında pulls/<n>/commits çağırır
@@ -43,20 +47,23 @@ jobs:
 
   semgrep:
     name: Semgrep CE (security-audit)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     permissions:
       contents: read
-    container:
-      image: semgrep/semgrep@sha256:67319956da3dcb58baf5b322899c15458e3963e7018a86aeeb5cd224e69cb77a # v1.173.0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Semgrep kur (kaldirilan imajin etiketiyle ayni surum)
+        run: python -m pip install --quiet semgrep==1.173.0
       - run: semgrep scan --config p/security-audit --error
 
   trivy-fs:
     name: Trivy bağımlılık CVE (CRITICAL kapı)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -84,7 +91,7 @@ jobs:
     name: CodeQL SAST
     # Dependabot PR'ı kaynak kodu değiştirmez; en pahalı iş boşuna koşmasın.
     if: github.actor != 'dependabot[bot]'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     permissions:
       contents: read
       security-events: write   # PUBLIC repo → code scanning ÜCRETSİZ, SARIF Security sekmesine yüklenir
